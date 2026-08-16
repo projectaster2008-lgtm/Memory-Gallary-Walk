@@ -214,11 +214,11 @@ export default function Card({
     return dummy.quaternion.clone();
   }, [position]);
 
-  // Curved Geometry for Card Face
+  // Curved Geometry for Card Face - Optimized vertex density for ultra-high 60+ FPS
   const geometry = useMemo(() => {
     const width = CARD_WIDTH * scale;
     const height = CARD_HEIGHT * scale;
-    const geo = new THREE.PlaneGeometry(width, height, 28, 28);
+    const geo = new THREE.PlaneGeometry(width, height, 8, 8);
     const pos = geo.attributes.position;
 
     for (let i = 0; i < pos.count; i++) {
@@ -239,10 +239,13 @@ export default function Card({
     return geo;
   }, [scale]);
 
-  // 3D Glowing Wireframe Outline Edges
+  // 3D Outer Perimeter Border Edges (threshold angle 40 removes all internal grid lines)
   const wireframeGeometry = useMemo(() => {
-    return new THREE.EdgesGeometry(geometry);
+    return new THREE.EdgesGeometry(geometry, 40);
   }, [geometry]);
+
+  // Pre-allocated temporary vector to avoid 60fps garbage collection
+  const tempPosRef = useRef(new THREE.Vector3());
 
   // Subtle breathing pulse for active destination node
   useFrame(({ clock }) => {
@@ -259,11 +262,10 @@ export default function Card({
     const currentScale = (animScale + pulseExtra) * clickSquash;
     groupRef.current.scale.set(currentScale, currentScale, currentScale);
 
-    // Physical 3D Elevation along outward normal
-    const elevatedPos = position
-      .clone()
-      .add(normalVector.clone().multiplyScalar(elevation + (isActive ? pulseExtra * 2 : 0)));
-    groupRef.current.position.copy(elevatedPos);
+    // Physical 3D Elevation along outward normal without garbage collection
+    const currentElevation = elevation + (isActive ? pulseExtra * 2 : 0);
+    tempPosRef.current.copy(position).addScaledVector(normalVector, currentElevation);
+    groupRef.current.position.copy(tempPosRef.current);
 
     if (borderRef.current) {
       const mat = borderRef.current.material as THREE.LineBasicMaterial;

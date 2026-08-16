@@ -431,10 +431,17 @@ export default function GalleryGlobe({
         isPlaying={isMusicPlaying}
       />
 
-      {/* 3D WebGL Canvas */}
+      {/* 3D WebGL Canvas with Performance Clamping and High FPS */}
       <Canvas
         camera={{ position: [0, 0, DEFAULT_CAMERA_Z], fov: 45, near: 0.1, far: 100 }}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, isMobile ? 1.5 : 2]}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance',
+          stencil: false,
+          depth: true,
+        }}
       >
         <CameraController targetZ={targetZ} />
         <Suspense fallback={null}>
@@ -565,12 +572,12 @@ export default function GalleryGlobe({
         </div>
       </div>
 
-      {/* Bottom Left Corner: Door Portal Exit to ating-universe.vercel.app */}
-      <div className="absolute bottom-6 left-4 z-30 pointer-events-auto">
+      {/* Bottom Left: Door Portal Exit to ating-universe.vercel.app (Positioned slightly above bottom controls to avoid mobile overlap) */}
+      <div className="absolute bottom-20 sm:bottom-24 left-4 z-30 pointer-events-auto">
         <a
           href="https://ating-universe.vercel.app"
           onClick={handleExitPortal}
-          className="group flex items-center gap-2 bg-neutral-950/90 hover:bg-neutral-900/95 backdrop-blur-xl border border-white/20 hover:border-emerald-400/50 px-3.5 py-2.5 rounded-full shadow-2xl text-white transition-all duration-300 hover:scale-105 active:scale-95 interactive-control cursor-pointer"
+          className="group flex items-center gap-2 bg-neutral-950/90 hover:bg-neutral-900/95 backdrop-blur-xl border border-white/20 hover:border-emerald-400/50 px-3.5 py-2 sm:py-2.5 rounded-full shadow-2xl text-white transition-all duration-300 hover:scale-105 active:scale-95 interactive-control cursor-pointer"
           style={{
             boxShadow: '0 8px 28px -4px rgba(16, 185, 129, 0.25)',
           }}

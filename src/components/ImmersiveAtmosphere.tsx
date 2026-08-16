@@ -45,8 +45,9 @@ export default function ImmersiveAtmosphere({
     };
     window.addEventListener('resize', handleResize);
 
-    // Initialize particles based on track theme
-    const count = isPlaying ? 55 : 35;
+    // Optimized particle count based on screen size and playing state
+    const isMobileDevice = window.innerWidth < 768;
+    const count = isMobileDevice ? (isPlaying ? 24 : 16) : (isPlaying ? 40 : 25);
     const hues = track.palette.particleHue;
     const particles: Particle[] = [];
 
@@ -54,13 +55,13 @@ export default function ImmersiveAtmosphere({
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: track.themeId === 'blossom' ? -(Math.random() * 0.5 + 0.2) : (Math.random() - 0.5) * 0.3,
-        radius: Math.random() * (track.themeId === 'prismatic_colors' ? 4.5 : 3.5) + 1.2,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: track.themeId === 'blossom' ? -(Math.random() * 0.45 + 0.15) : (Math.random() - 0.5) * 0.25,
+        radius: Math.random() * (track.themeId === 'prismatic_colors' ? 3.8 : 3.0) + 1.0,
         hue: hues[Math.floor(Math.random() * hues.length)],
-        alpha: Math.random() * 0.6 + 0.2,
-        alphaSpeed: (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
-        swaySpeed: Math.random() * 0.03 + 0.01,
+        alpha: Math.random() * 0.55 + 0.2,
+        alphaSpeed: (Math.random() * 0.008 + 0.004) * (Math.random() > 0.5 ? 1 : -1),
+        swaySpeed: Math.random() * 0.025 + 0.008,
         swayAngle: Math.random() * Math.PI * 2,
       });
     }
@@ -100,10 +101,10 @@ export default function ImmersiveAtmosphere({
       ctx.fillStyle = auraGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // Draw particles
+      // Draw particles with performant native gradients instead of expensive full-canvas shadowBlur
       particlesRef.current.forEach((p) => {
         p.swayAngle += p.swaySpeed;
-        p.x += p.vx + Math.sin(p.swayAngle) * (track.themeId === 'blossom' ? 0.6 : 0.25);
+        p.x += p.vx + Math.sin(p.swayAngle) * (track.themeId === 'blossom' ? 0.5 : 0.2);
         p.y += p.vy;
 
         p.alpha += p.alphaSpeed;
@@ -117,32 +118,24 @@ export default function ImmersiveAtmosphere({
         if (p.x < -10) p.x = width + 10;
         if (p.x > width + 10) p.x = -10;
 
-        ctx.save();
         ctx.beginPath();
 
         if (track.themeId === 'blossom') {
           // Petal oval shape
           ctx.ellipse(p.x, p.y, p.radius * 1.5, p.radius * 0.9, p.swayAngle, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${p.alpha * 0.8})`;
-          ctx.shadowColor = `hsla(${p.hue}, 90%, 70%, 0.4)`;
-          ctx.shadowBlur = 8;
+          ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${p.alpha * 0.75})`;
         } else if (track.themeId === 'nostalgia_forest') {
           // Firefly glowing orb
           ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${p.hue}, 85%, 65%, ${p.alpha * 0.9})`;
-          ctx.shadowColor = `hsla(${p.hue}, 90%, 60%, 0.6)`;
-          ctx.shadowBlur = 12;
+          ctx.fillStyle = `hsla(${p.hue}, 85%, 65%, ${p.alpha * 0.85})`;
         } else {
           // True Colors chromatic star / prism
           const currentHue = (p.hue + tick * 20) % 360;
           ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${currentHue}, 90%, 70%, ${p.alpha * 0.95})`;
-          ctx.shadowColor = `hsla(${currentHue}, 95%, 65%, 0.7)`;
-          ctx.shadowBlur = 14;
+          ctx.fillStyle = `hsla(${currentHue}, 90%, 70%, ${p.alpha * 0.9})`;
         }
 
         ctx.fill();
-        ctx.restore();
       });
 
       animFrameId.current = requestAnimationFrame(render);
