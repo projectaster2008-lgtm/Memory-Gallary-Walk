@@ -1,0 +1,10 @@
+{
+  "name": "Memory Gallary Walk",
+  "description": "An interactive 3D spherical memory gallery walk. Features WebGL 3D globe visualization of curated global destinations, guided cinematic memory walk, dome penetration, and AI story narrations.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
