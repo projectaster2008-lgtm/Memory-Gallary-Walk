@@ -1,4 +1,5 @@
 import { MemoryItem } from '../types';
+import { getHardcodedStory } from './narratives';
 
 export type MediaType = 'image' | 'video' | 'audio' | 'unknown';
 
@@ -230,7 +231,7 @@ export function processMemoryItem(raw: Partial<MemoryItem>): MemoryItem {
     imageUrl: finalImgUrl,
     thumbnailUrl: finalThumbUrl,
     description: raw.description || `Captured memory preserved in the interactive 3D gallery walk.`,
-    aiStory: raw.aiStory,
+    aiStory: raw.aiStory || getHardcodedStory({ ...raw, driveFileId: info.driveFileId, isVideo: info.isVideo }),
     videoUrl: raw.videoUrl || (info.isVideo ? info.streamUrl : undefined),
     videoEmbedUrl: info.embedUrl,
     isVideo: info.isVideo,

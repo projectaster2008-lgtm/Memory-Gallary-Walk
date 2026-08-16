@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import gsap from 'gsap';
 import { CARD_WIDTH, CARD_HEIGHT, GLOBE_RADIUS } from '../data';
 import { MemoryItem } from '../types';
@@ -30,6 +31,7 @@ export default function Card({
   const meshRef = useRef<THREE.Mesh>(null);
   const borderRef = useRef<THREE.LineSegments>(null);
   const glowPlaneRef = useRef<THREE.Mesh>(null);
+  const labelRef = useRef<HTMLDivElement>(null);
 
   const [hovered, setHovered] = useState(false);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
@@ -64,6 +66,31 @@ export default function Card({
       duration: isActive ? 0.65 : 0.4,
       ease: isActive ? 'back.out(1.8)' : 'power2.out',
     });
+
+    // Subtle GSAP Hover Animation for the .globe-node location label
+    if (labelRef.current) {
+      if (hovered || isActive) {
+        gsap.to(labelRef.current, {
+          opacity: 1,
+          y: -4,
+          scale: isActive ? 1.15 : 1.1,
+          filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.75)) brightness(1.15)',
+          duration: 0.35,
+          ease: 'back.out(1.7)',
+          overwrite: 'auto',
+        });
+      } else {
+        gsap.to(labelRef.current, {
+          opacity: 0,
+          y: 6,
+          scale: 0.85,
+          filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4)) brightness(1.0)',
+          duration: 0.22,
+          ease: 'power2.in',
+          overwrite: 'auto',
+        });
+      }
+    }
   }, [hovered, isActive]);
 
   // Initial Sleek Placeholder Texture & Multi-Tier Reliable Loader
@@ -327,6 +354,32 @@ export default function Card({
           linewidth={2}
         />
       </lineSegments>
+
+      {/* Subtle GSAP Hover Location Label (.globe-node) */}
+      <Html
+        position={[0, -CARD_HEIGHT * scale * 0.5 - 0.28, 0.05]}
+        center
+        distanceFactor={16}
+        zIndexRange={[100, 0]}
+        style={{ pointerEvents: 'none' }}
+      >
+        <div
+          ref={labelRef}
+          className="globe-node flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-950/90 backdrop-blur-md border border-white/20 text-white shadow-xl pointer-events-none select-none text-[11px] font-medium tracking-wide whitespace-nowrap opacity-0"
+          style={{
+            transform: 'translateY(6px) scale(0.9)',
+            boxShadow: isActive
+              ? '0 0 16px rgba(56, 189, 248, 0.45)'
+              : '0 4px 14px rgba(0, 0, 0, 0.6)',
+          }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: isActive ? '#38bdf8' : '#34d399' }}
+          />
+          <span className="text-gray-100 font-semibold">{memory.location || memory.title || 'Memory'}</span>
+        </div>
+      </Html>
     </group>
   );
 }

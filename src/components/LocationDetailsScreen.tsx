@@ -25,6 +25,7 @@ import { MemoryItem } from '../types';
 import VideoPlayer from './VideoPlayer';
 import SafeImage from './SafeImage';
 import { detectMediaType, resolveMediaInfo, processMemoryItem } from '../utils/mediaProcessor';
+import { getHardcodedStory, STORY_TONES } from '../utils/narratives';
 
 interface LocationDetailsProps {
   memory: MemoryItem;
@@ -32,13 +33,6 @@ interface LocationDetailsProps {
   onSelectMemory: (memory: MemoryItem) => void;
   onClose: () => void;
 }
-
-const STORY_TONES = [
-  { id: "Clint's Heart", label: "Kwento ni Clint", icon: '💬' },
-  { id: 'Quiet Wonder', label: 'Quiet Wonder', icon: '🌿' },
-  { id: 'Playful & Random', label: 'Hahaha / Random', icon: '😄' },
-  { id: 'Pasalamat & Gratitude', label: 'Pasalamat', icon: '✨' },
-];
 
 export default function LocationDetailsScreen({
   memory: rawMemory,
@@ -54,9 +48,9 @@ export default function LocationDetailsScreen({
     isVideoMemory ? 'video' : 'story'
   );
   
-  // AI Story Generation State
-  const [aiStory, setAiStory] = useState<string | null>(memory.aiStory || null);
+  // Hardcoded Default Story State
   const [selectedTone, setSelectedTone] = useState("Clint's Heart");
+  const [aiStory, setAiStory] = useState<string>(() => memory.aiStory || getHardcodedStory(memory, "Clint's Heart"));
   const [isStoryLoading, setIsStoryLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -87,11 +81,16 @@ export default function LocationDetailsScreen({
     };
   }, []);
 
-  // Fetch or generate AI Memory Story
+  // Update or switch AI Memory Story
   const handleGenerateStory = async (tone = selectedTone) => {
     stopSpeech();
-    setIsStoryLoading(true);
+    
+    // 1. Immediately switch to hardcoded bespoke story
+    const instantStory = getHardcodedStory(memory, tone);
+    setAiStory(instantStory);
+    memory.aiStory = instantStory;
 
+    // 2. If online and API is accessible, optionally enhance
     try {
       const res = await fetch('/api/memory-story', {
         method: 'POST',
@@ -103,31 +102,29 @@ export default function LocationDetailsScreen({
           style: tone,
         }),
       });
-      const data = await res.json();
-      if (data.story) {
-        setAiStory(data.story);
-        memory.aiStory = data.story;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.story) {
+          setAiStory(data.story);
+          memory.aiStory = data.story;
+        }
       }
-    } catch (e) {
-      console.error('Failed to generate story:', e);
-    } finally {
-      setIsStoryLoading(false);
+    } catch {
+      // Seamlessly stay on hardcoded story
     }
   };
 
-  // Trigger story automatically on first open if empty
+  // Sync state on memory change
   useEffect(() => {
     stopSpeech();
-    if (!memory.aiStory) {
-      handleGenerateStory(selectedTone);
-    } else {
-      setAiStory(memory.aiStory);
-    }
-    // Sync video state
+    const activeStory = memory.aiStory || getHardcodedStory(memory, selectedTone);
+    setAiStory(activeStory);
+    memory.aiStory = activeStory;
+
     if (isVideoMemory) {
       setActiveTab('video');
     }
-  }, [memory.id, isVideoMemory]);
+  }, [memory.id, isVideoMemory, selectedTone]);
 
   // Read aloud narration
   const handleToggleSpeech = () => {
