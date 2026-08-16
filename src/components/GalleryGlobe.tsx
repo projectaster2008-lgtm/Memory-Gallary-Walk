@@ -14,6 +14,8 @@ import {
   RotateCcw,
   Shuffle,
   Eye,
+  DoorOpen,
+  ExternalLink,
 } from 'lucide-react';
 import { GLOBE_RADIUS } from '../data';
 import { MemoryItem, ViewMode } from '../types';
@@ -116,6 +118,32 @@ export default function GalleryGlobe({
   const [walkHistory, setWalkHistory] = useState<number[]>([0]);
   const [historyPointer, setHistoryPointer] = useState<number>(0);
   const [viewMode, setViewMode] = useState<ViewMode>('sphere');
+  const [isExitingPortal, setIsExitingPortal] = useState(false);
+
+  // Handle Cinematic Portal Exit Transition
+  const handleExitPortal = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (isExitingPortal) return;
+    setIsExitingPortal(true);
+
+    // Zoom camera outwards and speed up globe rotation
+    if (gsapTimelineRef.current) {
+      gsapTimelineRef.current.kill();
+    }
+    gsap.to(animProxyRef.current, {
+      z: isMobile ? 45 : 36,
+      duration: 1.2,
+      ease: 'power3.in',
+      onUpdate: () => {
+        targetZ.current = animProxyRef.current.z;
+      },
+    });
+
+    // Smooth redirect after cinematic warp animation
+    setTimeout(() => {
+      window.location.href = 'https://ating-universe.vercel.app';
+    }, 1100);
+  };
 
   // Cursor UI state
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -468,36 +496,38 @@ export default function GalleryGlobe({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.35, delay: 0.05 }}
-          className="hidden lg:flex items-center gap-2 bg-neutral-950/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg pointer-events-auto interactive-control text-white"
+          className="hidden xl:flex items-center gap-1.5 bg-neutral-950/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-lg pointer-events-auto interactive-control text-white max-w-md"
         >
-          <div className="flex items-center gap-2 pl-2">
-            <Search className="w-3.5 h-3.5 text-gray-400" />
+          <div className="flex items-center gap-1.5 pl-1.5">
+            <Search className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search memories or places..."
+              placeholder="Search places..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="text-xs text-white placeholder:text-gray-400 bg-transparent outline-none w-36 focus:w-48 transition-all"
+              className="text-xs text-white placeholder:text-gray-400 bg-transparent outline-none w-28 focus:w-36 transition-all"
             />
           </div>
 
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-              className={`text-[10px] px-2.5 py-1 rounded-full font-medium transition-all ${
-                activeTag === tag
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
-              }`}
-            >
-              #{tag}
-            </button>
-          ))}
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-[200px]">
+            {allTags.slice(0, 3).map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
+                className={`text-[10px] px-2 py-0.5 rounded-full font-medium transition-all whitespace-nowrap ${
+                  activeTag === tag
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
         {/* Right: View Modes & Global Music Bar */}
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <div className="flex items-center gap-2 pointer-events-auto flex-shrink-0">
           {/* View Modes Selector */}
           <div className="flex items-center gap-1 bg-neutral-950/85 backdrop-blur-md p-1 rounded-full border border-white/10 shadow-lg text-white interactive-control">
             <button
@@ -534,6 +564,66 @@ export default function GalleryGlobe({
           />
         </div>
       </div>
+
+      {/* Bottom Left Corner: Door Portal Exit to ating-universe.vercel.app */}
+      <div className="absolute bottom-6 left-4 z-30 pointer-events-auto">
+        <a
+          href="https://ating-universe.vercel.app"
+          onClick={handleExitPortal}
+          className="group flex items-center gap-2 bg-neutral-950/90 hover:bg-neutral-900/95 backdrop-blur-xl border border-white/20 hover:border-emerald-400/50 px-3.5 py-2.5 rounded-full shadow-2xl text-white transition-all duration-300 hover:scale-105 active:scale-95 interactive-control cursor-pointer"
+          style={{
+            boxShadow: '0 8px 28px -4px rgba(16, 185, 129, 0.25)',
+          }}
+          title="Return to Ating Universe"
+        >
+          <div className="w-6 h-6 rounded-full bg-emerald-500/20 group-hover:bg-emerald-500/30 border border-emerald-400/40 flex items-center justify-center text-emerald-400 transition-colors">
+            <DoorOpen className="w-3.5 h-3.5 transition-transform group-hover:rotate-12" />
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[11px] font-semibold text-gray-100 group-hover:text-emerald-300 transition-colors leading-tight flex items-center gap-1">
+              Universe Portal
+              <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
+            </span>
+            <span className="text-[9px] text-gray-400 leading-tight">
+              ating-universe.vercel.app
+            </span>
+          </div>
+        </a>
+      </div>
+
+      {/* Cinematic Portal Warp Transition Overlay */}
+      <AnimatePresence>
+        {isExitingPortal && (
+          <motion.div
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(20px)' }}
+            transition={{ duration: 0.9, ease: 'easeInOut' }}
+            className="fixed inset-0 z-50 pointer-events-none flex flex-col items-center justify-center bg-black/80"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1.2, opacity: 1 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="flex flex-col items-center gap-4 text-center px-4"
+            >
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 shadow-[0_0_40px_rgba(52,211,153,0.8)] animate-pulse">
+                  <DoorOpen className="w-8 h-8" />
+                </div>
+                <div className="absolute inset-0 rounded-full border border-emerald-300 animate-ping opacity-30" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold tracking-wider text-white font-sans">
+                  Entering Ating Universe
+                </h3>
+                <p className="text-xs text-emerald-300/80 font-mono tracking-widest uppercase">
+                  Transitioning dimensions...
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom Floating Walk Tour Controller */}
       <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-3 pointer-events-none z-30 px-4">

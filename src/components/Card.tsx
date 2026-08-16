@@ -67,7 +67,7 @@ export default function Card({
       ease: isActive ? 'back.out(1.8)' : 'power2.out',
     });
 
-    // Subtle GSAP Hover Animation for the .globe-node location label
+    // Subtle GSAP Hover and Exit Animation for the .globe-node location label
     if (labelRef.current) {
       if (hovered || isActive) {
         gsap.to(labelRef.current, {
@@ -83,10 +83,10 @@ export default function Card({
         gsap.to(labelRef.current, {
           opacity: 0,
           y: 6,
-          scale: 0.85,
-          filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4)) brightness(1.0)',
-          duration: 0.22,
-          ease: 'power2.in',
+          scale: 0.8,
+          filter: 'drop-shadow(0 0px 0px rgba(0,0,0,0)) brightness(0.9)',
+          duration: 0.28,
+          ease: 'power3.inOut',
           overwrite: 'auto',
         });
       }
