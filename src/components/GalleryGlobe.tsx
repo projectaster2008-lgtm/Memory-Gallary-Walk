@@ -21,6 +21,7 @@ import { globalPlaylist, SongTrack } from '../utils/playlistEngine';
 import Globe from './Globe';
 import ImmersiveAtmosphere from './ImmersiveAtmosphere';
 import MusicPlaylistBar from './MusicPlaylistBar';
+import SafeImage from './SafeImage';
 
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 const DEFAULT_CAMERA_Z = isMobile ? 26.5 : 19.5;
@@ -550,11 +551,15 @@ export default function GalleryGlobe({
                 boxShadow: `0 12px 36px -6px ${currentTrack.palette.glow}`,
               }}
             >
-              <img
-                src={currentWalkingMemory.imageUrl || currentWalkingMemory.thumbnailUrl}
-                alt={currentWalkingMemory.title}
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border border-white/10 shadow-sm flex-shrink-0"
-              />
+              <div className="relative flex-shrink-0 group overflow-hidden rounded-xl">
+                <SafeImage
+                  memory={currentWalkingMemory}
+                  src={currentWalkingMemory.imageUrl || currentWalkingMemory.thumbnailUrl}
+                  alt={currentWalkingMemory.title}
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border border-white/10 shadow-sm transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors pointer-events-none" />
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <Shuffle
@@ -575,7 +580,7 @@ export default function GalleryGlobe({
               </div>
               <button
                 onClick={() => onSelect(currentWalkingMemory)}
-                className="px-3.5 py-2 bg-white hover:bg-gray-100 text-gray-900 text-xs font-semibold rounded-xl transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 hover:scale-105"
+                className="px-3.5 py-2 bg-white hover:bg-gray-100 text-gray-900 text-xs font-semibold rounded-xl transition-all shadow-md flex items-center gap-1.5 flex-shrink-0 hover:scale-105 active:scale-95"
               >
                 <Eye className="w-3.5 h-3.5 text-gray-900" />
                 <span>Inspect</span>

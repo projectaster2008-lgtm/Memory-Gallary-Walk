@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import gsap from 'gsap';
 import { CARD_WIDTH, CARD_HEIGHT, GLOBE_RADIUS } from '../data';
 import { MemoryItem } from '../types';
 
@@ -25,38 +26,77 @@ export default function Card({
   onHover,
   onHoverOut,
 }: CardProps) {
+  const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
+  const borderRef = useRef<THREE.LineSegments>(null);
+  const glowPlaneRef = useRef<THREE.Mesh>(null);
+
   const [hovered, setHovered] = useState(false);
   const [texture, setTexture] = useState<THREE.Texture | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Initial Placeholder Texture
+  // Normal vector pointing outward from sphere center (0,0,0)
+  const normalVector = useMemo(() => {
+    return position.clone().normalize();
+  }, [position]);
+
+  // GSAP Animated values proxy
+  const animState = useRef({
+    scale: 1,
+    elevation: 0,
+    borderOpacity: 0.2,
+    borderGlow: 0,
+    clickSquash: 1,
+  });
+
+  // GSAP Tween management for smooth hover and selection animations
+  useEffect(() => {
+    const targetScale = isActive ? 1.24 : hovered ? 1.18 : 1.0;
+    const targetElevation = isActive ? 0.72 : hovered ? 0.48 : 0.0;
+    const targetBorderOpacity = isActive ? 0.95 : hovered ? 0.85 : 0.25;
+    const targetGlow = isActive ? 1.0 : hovered ? 0.75 : 0.0;
+
+    gsap.to(animState.current, {
+      scale: targetScale,
+      elevation: targetElevation,
+      borderOpacity: targetBorderOpacity,
+      borderGlow: targetGlow,
+      duration: isActive ? 0.65 : 0.4,
+      ease: isActive ? 'back.out(1.8)' : 'power2.out',
+    });
+  }, [hovered, isActive]);
+
+  // Initial Sleek Placeholder Texture & Multi-Tier Reliable Loader
   useEffect(() => {
     let active = true;
 
-    // Create a sleek minimalist placeholder canvas with subtle gradient and index
+    // Create a sleek minimalist placeholder canvas with subtle gradient and title
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 680;
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      // Warm modern neutral background
       const grad = ctx.createLinearGradient(0, 0, 0, 680);
-      grad.addColorStop(0, '#f3f4f6');
-      grad.addColorStop(1, '#e5e7eb');
+      grad.addColorStop(0, '#1e293b');
+      grad.addColorStop(1, '#0f172a');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 512, 680);
 
-      // Subtle inner border
-      ctx.strokeStyle = '#d1d5db';
+      // Subtle inner frame
+      ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 4;
-      ctx.strokeRect(8, 8, 496, 664);
+      ctx.strokeRect(12, 12, 488, 656);
 
-      // Caption text
-      ctx.fillStyle = '#9ca3af';
-      ctx.font = '600 24px sans-serif';
+      // Title & number
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 26px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(memory.title ? memory.title.slice(0, 24) : `Memory #${index + 1}`, 256, 340);
+      const cleanTitle = (memory.title || `Memory #${index + 1}`).slice(0, 22);
+      ctx.fillText(cleanTitle, 256, 320);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '16px sans-serif';
+      ctx.fillText(memory.location || 'Echoes Spherical Gallery', 256, 360);
     }
 
     const placeholderTex = new THREE.CanvasTexture(canvas);
@@ -66,10 +106,28 @@ export default function Card({
     setTexture(placeholderTex);
 
     // Stagger texture load slightly for performance
-    const delay = (index % 12) * 40;
+    const delay = (index % 12) * 35;
     const timer = setTimeout(() => {
-      const urlToLoad = memory.imageUrl || memory.thumbnailUrl;
-      if (!urlToLoad) return;
+      const fileIdMatch =
+        memory.driveFileId ||
+        (memory.id || '').replace('drive-', '') ||
+        (memory.imageUrl || '').match(/drive-image\/([^/?]+)/)?.[1] ||
+        (memory.imageUrl || '').match(/\/d\/([^/?=]+)/)?.[1];
+
+      // Multi-Tier fallback URLs (Direct Google CDN -> Drive Thumbnail -> Direct Download -> Local Proxy)
+      const primaryUrl = fileIdMatch
+        ? `https://lh3.googleusercontent.com/d/${fileIdMatch}=s800`
+        : memory.imageUrl || memory.thumbnailUrl;
+
+      const fallbackUrl1 = fileIdMatch
+        ? `https://drive.google.com/thumbnail?id=${fileIdMatch}&sz=w800`
+        : null;
+
+      const fallbackUrl2 = fileIdMatch
+        ? `https://drive.usercontent.google.com/download?id=${fileIdMatch}&export=download`
+        : null;
+
+      const fallbackUrl3 = fileIdMatch ? `/api/drive-image/${fileIdMatch}` : null;
 
       const loader = new THREE.TextureLoader();
       loader.setCrossOrigin('anonymous');
@@ -85,11 +143,13 @@ export default function Card({
       };
 
       const tryLoad = (url: string, onFail?: () => void) => {
+        if (!url) {
+          if (onFail) onFail();
+          return;
+        }
         loader.load(
           url,
-          (loadedTex) => {
-            applyTexture(loadedTex);
-          },
+          (loadedTex) => applyTexture(loadedTex),
           undefined,
           () => {
             if (onFail) onFail();
@@ -97,17 +157,16 @@ export default function Card({
         );
       };
 
-      // Extract file id if present
-      const fileIdMatch = (memory.id || '').replace('drive-', '') || (memory.imageUrl || '').match(/drive-image\/([^/?]+)/)?.[1];
-      const fallbackUrl1 = fileIdMatch ? `https://lh3.googleusercontent.com/d/${fileIdMatch}=s800` : null;
-      const fallbackUrl2 = fileIdMatch ? `https://drive.google.com/thumbnail?id=${fileIdMatch}&sz=w800` : null;
-
-      tryLoad(urlToLoad, () => {
+      tryLoad(primaryUrl, () => {
         if (fallbackUrl1) {
           tryLoad(fallbackUrl1, () => {
             if (fallbackUrl2) {
               tryLoad(fallbackUrl2, () => {
-                // Keep initial placeholder texture gracefully
+                if (fallbackUrl3) {
+                  tryLoad(fallbackUrl3, () => {
+                    // Retain stylish placeholder canvas
+                  });
+                }
               });
             }
           });
@@ -119,21 +178,20 @@ export default function Card({
       active = false;
       clearTimeout(timer);
     };
-  }, [memory.imageUrl, memory.thumbnailUrl, memory.title, memory.id, index]);
+  }, [memory.imageUrl, memory.thumbnailUrl, memory.title, memory.location, memory.id, memory.driveFileId, index]);
 
   const rotationQuaternion = useMemo(() => {
     const dummy = new THREE.Object3D();
     dummy.position.copy(position);
-    // Point outward perpendicular to sphere center (0,0,0)
     dummy.lookAt(position.clone().multiplyScalar(2));
     return dummy.quaternion.clone();
   }, [position]);
 
+  // Curved Geometry for Card Face
   const geometry = useMemo(() => {
-    // 32x32 vertices for smooth curvature conforming to sphere
     const width = CARD_WIDTH * scale;
     const height = CARD_HEIGHT * scale;
-    const geo = new THREE.PlaneGeometry(width, height, 32, 32);
+    const geo = new THREE.PlaneGeometry(width, height, 28, 28);
     const pos = geo.attributes.position;
 
     for (let i = 0; i < pos.count; i++) {
@@ -154,48 +212,121 @@ export default function Card({
     return geo;
   }, [scale]);
 
-  // Smooth hover and active animation
-  useFrame((_, delta) => {
-    if (!meshRef.current) return;
-    const targetScale = hovered || isActive ? 1.08 : 1.0;
-    meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), delta * 8);
+  // 3D Glowing Wireframe Outline Edges
+  const wireframeGeometry = useMemo(() => {
+    return new THREE.EdgesGeometry(geometry);
+  }, [geometry]);
+
+  // Subtle breathing pulse for active destination node
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+
+    const { scale: animScale, elevation, borderOpacity, clickSquash } = animState.current;
+
+    // Active beacon pulse
+    let pulseExtra = 0;
+    if (isActive) {
+      pulseExtra = Math.sin(clock.getElapsedTime() * 4.5) * 0.04;
+    }
+
+    const currentScale = (animScale + pulseExtra) * clickSquash;
+    groupRef.current.scale.set(currentScale, currentScale, currentScale);
+
+    // Physical 3D Elevation along outward normal
+    const elevatedPos = position
+      .clone()
+      .add(normalVector.clone().multiplyScalar(elevation + (isActive ? pulseExtra * 2 : 0)));
+    groupRef.current.position.copy(elevatedPos);
+
+    if (borderRef.current) {
+      const mat = borderRef.current.material as THREE.LineBasicMaterial;
+      if (mat) {
+        mat.opacity = THREE.MathUtils.lerp(mat.opacity, borderOpacity, 0.15);
+      }
+    }
   });
 
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+
+    // Tactile Click GSAP Squash & Spring Recoil Feedback
+    gsap.timeline()
+      .to(animState.current, {
+        clickSquash: 0.9,
+        duration: 0.08,
+        ease: 'power2.in',
+      })
+      .to(animState.current, {
+        clickSquash: 1.0,
+        duration: 0.25,
+        ease: 'back.out(2.5)',
+      });
+
+    onSelect(memory);
+  };
+
   return (
-    <mesh
-      ref={meshRef}
+    <group
+      ref={groupRef}
       position={position}
       quaternion={rotationQuaternion}
-      geometry={geometry}
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect(memory);
-      }}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        document.body.style.cursor = 'pointer';
-        if (onHover) {
-          onHover(memory);
-        }
-      }}
-      onPointerOut={() => {
-        setHovered(false);
-        document.body.style.cursor = 'auto';
-        if (onHoverOut) {
-          onHoverOut();
-        }
-      }}
     >
-      {texture && (
-        <meshBasicMaterial
-          map={texture}
-          side={THREE.DoubleSide}
-          toneMapped={false}
-          transparent={!isLoaded}
-          opacity={isLoaded ? 1 : 0.85}
-        />
+      {/* Active Glowing Backlight Disc */}
+      {(isActive || hovered) && (
+        <mesh
+          ref={glowPlaneRef}
+          position={[0, 0, -0.05]}
+          geometry={geometry}
+        >
+          <meshBasicMaterial
+            color={isActive ? '#38bdf8' : '#10b981'}
+            transparent
+            opacity={isActive ? 0.35 : 0.2}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
       )}
-    </mesh>
+
+      {/* Main Card Photo Mesh */}
+      <mesh
+        ref={meshRef}
+        geometry={geometry}
+        onClick={handleClick}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = 'pointer';
+          if (onHover) onHover(memory);
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = 'auto';
+          if (onHoverOut) onHoverOut();
+        }}
+      >
+        {texture && (
+          <meshBasicMaterial
+            map={texture}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+            transparent={!isLoaded}
+            opacity={isLoaded ? 1 : 0.85}
+          />
+        )}
+      </mesh>
+
+      {/* 3D Glowing Selection / Hover Frame Border */}
+      <lineSegments
+        ref={borderRef}
+        geometry={wireframeGeometry}
+      >
+        <lineBasicMaterial
+          color={isActive ? '#38bdf8' : hovered ? '#10b981' : '#ffffff'}
+          transparent
+          opacity={0.25}
+          linewidth={2}
+        />
+      </lineSegments>
+    </group>
   );
 }

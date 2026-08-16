@@ -176,8 +176,8 @@ export function resolveMediaInfo(item: Partial<MemoryItem>): ProcessedMediaInfo 
   let directWebLink = item.webViewLink;
 
   if (driveId) {
-    thumbnailUrl = `/api/drive-image/${driveId}?sz=w800`;
-    streamUrl = isVideo ? `/api/drive-image/${driveId}?sz=w1200` : `/api/drive-image/${driveId}`;
+    thumbnailUrl = `https://lh3.googleusercontent.com/d/${driveId}=s800`;
+    streamUrl = isVideo ? `https://lh3.googleusercontent.com/d/${driveId}=s1200` : `https://lh3.googleusercontent.com/d/${driveId}=s1200`;
     embedUrl = `https://drive.google.com/file/d/${driveId}/preview`;
     downloadUrl = `https://drive.usercontent.google.com/download?id=${driveId}&export=download`;
     directWebLink = directWebLink || `https://drive.google.com/file/d/${driveId}/view?usp=drive_web`;
@@ -207,6 +207,19 @@ export function processMemoryItem(raw: Partial<MemoryItem>): MemoryItem {
   const info = resolveMediaInfo(raw);
   const id = raw.id || (info.driveFileId ? `drive-${info.driveFileId}` : `mem-${Date.now()}-${Math.random()}`);
 
+  let finalImgUrl = raw.imageUrl || info.streamUrl;
+  let finalThumbUrl = raw.thumbnailUrl || info.thumbnailUrl;
+
+  // If using relative server proxy path, normalize to direct reliable CDN
+  if (info.driveFileId) {
+    if (!finalImgUrl || finalImgUrl.startsWith('/api/drive-image/')) {
+      finalImgUrl = `https://lh3.googleusercontent.com/d/${info.driveFileId}=s1200`;
+    }
+    if (!finalThumbUrl || finalThumbUrl.startsWith('/api/drive-image/')) {
+      finalThumbUrl = `https://lh3.googleusercontent.com/d/${info.driveFileId}=s800`;
+    }
+  }
+
   return {
     id,
     driveFileId: info.driveFileId,
@@ -214,8 +227,8 @@ export function processMemoryItem(raw: Partial<MemoryItem>): MemoryItem {
     title: raw.title || raw.name || 'Captured Moment',
     location: raw.location || 'Drive Collection',
     date: raw.date || 'Preserved Memory',
-    imageUrl: raw.imageUrl || info.streamUrl,
-    thumbnailUrl: raw.thumbnailUrl || info.thumbnailUrl,
+    imageUrl: finalImgUrl,
+    thumbnailUrl: finalThumbUrl,
     description: raw.description || `Captured memory preserved in the interactive 3D gallery walk.`,
     aiStory: raw.aiStory,
     videoUrl: raw.videoUrl || (info.isVideo ? info.streamUrl : undefined),

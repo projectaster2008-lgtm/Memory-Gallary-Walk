@@ -23,6 +23,7 @@ import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
 import { MemoryItem } from '../types';
 import VideoPlayer from './VideoPlayer';
+import SafeImage from './SafeImage';
 import { detectMediaType, resolveMediaInfo, processMemoryItem } from '../utils/mediaProcessor';
 
 interface LocationDetailsProps {
@@ -303,16 +304,10 @@ export default function LocationDetailsScreen({
               autoPlay={true}
             />
           ) : (
-            <img
+            <SafeImage
+              memory={memory}
               src={memory.imageUrl || memory.thumbnailUrl}
               alt={memory.title}
-              onError={(e) => {
-                const target = e.currentTarget;
-                const fileId = (memory.id || '').replace('drive-', '');
-                if (fileId && !target.src.includes('lh3.googleusercontent')) {
-                  target.src = `https://lh3.googleusercontent.com/d/${fileId}=s1200`;
-                }
-              }}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
           )}
