@@ -31,6 +31,7 @@ export default function Card({
   const meshRef = useRef<THREE.Mesh>(null);
   const borderRef = useRef<THREE.LineSegments>(null);
   const glowPlaneRef = useRef<THREE.Mesh>(null);
+  const touchGlowRef = useRef<THREE.Mesh>(null);
   const labelRef = useRef<HTMLDivElement>(null);
 
   const [hovered, setHovered] = useState(false);
@@ -49,47 +50,37 @@ export default function Card({
     borderOpacity: 0.2,
     borderGlow: 0,
     clickSquash: 1,
+    touchGlow: 0,
+    touchRipple: 1,
   });
 
   // GSAP Tween management for smooth hover and selection animations
   useEffect(() => {
-    const targetScale = isActive ? 1.24 : hovered ? 1.18 : 1.0;
-    const targetElevation = isActive ? 0.72 : hovered ? 0.48 : 0.0;
-    const targetBorderOpacity = isActive ? 0.95 : hovered ? 0.85 : 0.25;
-    const targetGlow = isActive ? 1.0 : hovered ? 0.75 : 0.0;
+    const targetScale = isActive ? 1.09 : hovered ? 1.06 : 1.0;
+    const targetElevation = isActive ? 0.24 : hovered ? 0.12 : 0.0;
+    const targetBorderOpacity = isActive ? 0.95 : hovered ? 0.8 : 0.2;
+    const targetGlow = isActive ? 1.0 : hovered ? 0.6 : 0.0;
 
     gsap.to(animState.current, {
       scale: targetScale,
       elevation: targetElevation,
       borderOpacity: targetBorderOpacity,
       borderGlow: targetGlow,
-      duration: isActive ? 0.65 : 0.4,
-      ease: isActive ? 'back.out(1.8)' : 'power2.out',
+      duration: 0.25,
+      ease: 'power2.out',
     });
 
     // Subtle GSAP Hover and Exit Animation for the .globe-node location label
-    if (labelRef.current) {
-      if (hovered || isActive) {
-        gsap.to(labelRef.current, {
-          opacity: 1,
-          y: -4,
-          scale: isActive ? 1.15 : 1.1,
-          filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.75)) brightness(1.15)',
-          duration: 0.35,
-          ease: 'back.out(1.7)',
-          overwrite: 'auto',
-        });
-      } else {
-        gsap.to(labelRef.current, {
-          opacity: 0,
-          y: 6,
-          scale: 0.8,
-          filter: 'drop-shadow(0 0px 0px rgba(0,0,0,0)) brightness(0.9)',
-          duration: 0.28,
-          ease: 'power3.inOut',
-          overwrite: 'auto',
-        });
-      }
+    if (labelRef.current && (hovered || isActive)) {
+      gsap.to(labelRef.current, {
+        opacity: 1,
+        y: -3,
+        scale: 1.0,
+        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.65))',
+        duration: 0.22,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
     }
   }, [hovered, isActive]);
 
@@ -214,11 +205,11 @@ export default function Card({
     return dummy.quaternion.clone();
   }, [position]);
 
-  // Curved Geometry for Card Face - Optimized vertex density for ultra-high 60+ FPS
+  // Curved Geometry for Card Face - Ultra-lightweight and smooth
   const geometry = useMemo(() => {
     const width = CARD_WIDTH * scale;
     const height = CARD_HEIGHT * scale;
-    const geo = new THREE.PlaneGeometry(width, height, 8, 8);
+    const geo = new THREE.PlaneGeometry(width, height, 4, 4);
     const pos = geo.attributes.position;
 
     for (let i = 0; i < pos.count; i++) {
@@ -239,7 +230,7 @@ export default function Card({
     return geo;
   }, [scale]);
 
-  // 3D Outer Perimeter Border Edges (threshold angle 40 removes all internal grid lines)
+  // 3D Outer Perimeter Border Edges
   const wireframeGeometry = useMemo(() => {
     return new THREE.EdgesGeometry(geometry, 40);
   }, [geometry]);
@@ -247,51 +238,76 @@ export default function Card({
   // Pre-allocated temporary vector to avoid 60fps garbage collection
   const tempPosRef = useRef(new THREE.Vector3());
 
-  // Subtle breathing pulse for active destination node
+  // Subtle breathing pulse for active destination node (minimized)
   useFrame(({ clock }) => {
     if (!groupRef.current) return;
 
     const { scale: animScale, elevation, borderOpacity, clickSquash } = animState.current;
 
-    // Active beacon pulse
-    let pulseExtra = 0;
-    if (isActive) {
-      pulseExtra = Math.sin(clock.getElapsedTime() * 4.5) * 0.04;
-    }
+    // Subtle beacon pulse (minimized scaling)
+    const pulseExtra = isActive ? Math.sin(clock.getElapsedTime() * 3.0) * 0.012 : 0;
 
     const currentScale = (animScale + pulseExtra) * clickSquash;
     groupRef.current.scale.set(currentScale, currentScale, currentScale);
 
     // Physical 3D Elevation along outward normal without garbage collection
-    const currentElevation = elevation + (isActive ? pulseExtra * 2 : 0);
+    const currentElevation = elevation + (isActive ? pulseExtra * 1.5 : 0);
     tempPosRef.current.copy(position).addScaledVector(normalVector, currentElevation);
     groupRef.current.position.copy(tempPosRef.current);
 
     if (borderRef.current) {
       const mat = borderRef.current.material as THREE.LineBasicMaterial;
-      if (mat) {
+      if (mat && (hovered || isActive)) {
         mat.opacity = THREE.MathUtils.lerp(mat.opacity, borderOpacity, 0.15);
       }
     }
+
+    if (touchGlowRef.current) {
+      const { touchGlow, touchRipple } = animState.current;
+      const touchMat = touchGlowRef.current.material as THREE.MeshBasicMaterial;
+      if (touchMat) {
+        touchMat.opacity = touchGlow;
+      }
+      touchGlowRef.current.scale.set(touchRipple, touchRipple, 1);
+    }
   });
+
+  const triggerHapticFeedback = () => {
+    // 1. Mobile hardware micro-vibration haptic if supported
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(12);
+      } catch (_) {}
+    }
+
+    // 2. Soft Luminous Haptic Visual Pulse & Tactile Squash
+    gsap.killTweensOf(animState.current, 'touchGlow,touchRipple,clickSquash');
+    gsap.timeline()
+      .to(animState.current, {
+        touchGlow: 0.85,
+        touchRipple: 1.04,
+        clickSquash: 0.95,
+        duration: 0.05,
+        ease: 'power2.out',
+      })
+      .to(animState.current, {
+        touchGlow: 0.0,
+        touchRipple: 1.28,
+        clickSquash: 1.0,
+        duration: 0.38,
+        ease: 'power2.out',
+      });
+  };
 
   const handleClick = (e: any) => {
     e.stopPropagation();
-
-    // Tactile Click GSAP Squash & Spring Recoil Feedback
-    gsap.timeline()
-      .to(animState.current, {
-        clickSquash: 0.9,
-        duration: 0.08,
-        ease: 'power2.in',
-      })
-      .to(animState.current, {
-        clickSquash: 1.0,
-        duration: 0.25,
-        ease: 'back.out(2.5)',
-      });
-
+    triggerHapticFeedback();
     onSelect(memory);
+  };
+
+  const handlePointerDown = (e: any) => {
+    e.stopPropagation();
+    triggerHapticFeedback();
   };
 
   return (
@@ -300,17 +316,33 @@ export default function Card({
       position={position}
       quaternion={rotationQuaternion}
     >
+      {/* Subtle Haptic-like Soft Glow Halo on Mobile / Interaction */}
+      <mesh
+        ref={touchGlowRef}
+        position={[0, 0, -0.06]}
+        geometry={geometry}
+      >
+        <meshBasicMaterial
+          color={isActive ? '#38bdf8' : '#34d399'}
+          transparent
+          opacity={0}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+
       {/* Active Glowing Backlight Disc */}
       {(isActive || hovered) && (
         <mesh
           ref={glowPlaneRef}
-          position={[0, 0, -0.05]}
+          position={[0, 0, -0.04]}
           geometry={geometry}
         >
           <meshBasicMaterial
             color={isActive ? '#38bdf8' : '#10b981'}
             transparent
-            opacity={isActive ? 0.35 : 0.2}
+            opacity={isActive ? 0.3 : 0.15}
             side={THREE.DoubleSide}
           />
         </mesh>
@@ -321,6 +353,7 @@ export default function Card({
         ref={meshRef}
         geometry={geometry}
         onClick={handleClick}
+        onPointerDown={handlePointerDown}
         onPointerOver={(e) => {
           e.stopPropagation();
           setHovered(true);
@@ -352,36 +385,38 @@ export default function Card({
         <lineBasicMaterial
           color={isActive ? '#38bdf8' : hovered ? '#10b981' : '#ffffff'}
           transparent
-          opacity={0.25}
-          linewidth={2}
+          opacity={isActive ? 0.9 : hovered ? 0.75 : 0.2}
+          linewidth={1.5}
         />
       </lineSegments>
 
-      {/* Subtle GSAP Hover Location Label (.globe-node) */}
-      <Html
-        position={[0, -CARD_HEIGHT * scale * 0.5 - 0.28, 0.05]}
-        center
-        distanceFactor={16}
-        zIndexRange={[100, 0]}
-        style={{ pointerEvents: 'none' }}
-      >
-        <div
-          ref={labelRef}
-          className="globe-node flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-950/90 backdrop-blur-md border border-white/20 text-white shadow-xl pointer-events-none select-none text-[11px] font-medium tracking-wide whitespace-nowrap opacity-0"
-          style={{
-            transform: 'translateY(6px) scale(0.9)',
-            boxShadow: isActive
-              ? '0 0 16px rgba(56, 189, 248, 0.45)'
-              : '0 4px 14px rgba(0, 0, 0, 0.6)',
-          }}
+      {/* Subtle GSAP Hover Location Label (.globe-node) - Only mounted on hover/active to eliminate DOM overhead */}
+      {(hovered || isActive) && (
+        <Html
+          position={[0, -CARD_HEIGHT * scale * 0.5 - 0.28, 0.05]}
+          center
+          distanceFactor={16}
+          zIndexRange={[100, 0]}
+          style={{ pointerEvents: 'none' }}
         >
-          <span
-            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: isActive ? '#38bdf8' : '#34d399' }}
-          />
-          <span className="text-gray-100 font-semibold">{memory.location || memory.title || 'Memory'}</span>
-        </div>
-      </Html>
+          <div
+            ref={labelRef}
+            className="globe-node flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-950/90 backdrop-blur-md border border-white/20 text-white shadow-xl pointer-events-none select-none text-[11px] font-medium tracking-wide whitespace-nowrap"
+            style={{
+              transform: 'translateY(0px)',
+              boxShadow: isActive
+                ? '0 0 16px rgba(56, 189, 248, 0.45)'
+                : '0 4px 14px rgba(0, 0, 0, 0.6)',
+            }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: isActive ? '#38bdf8' : '#34d399' }}
+            />
+            <span className="text-gray-100 font-semibold">{memory.location || memory.title || 'Memory'}</span>
+          </div>
+        </Html>
+      )}
     </group>
   );
 }

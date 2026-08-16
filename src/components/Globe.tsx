@@ -5,6 +5,9 @@ import { generateFibonacciSphere } from '../utils/math';
 import { GLOBE_RADIUS, DEFAULT_GRID_COUNT } from '../data';
 import { MemoryItem } from '../types';
 import Card from './Card';
+import AmbientCelestialCore from './AmbientCelestialCore';
+import DynamicSkyLighting from './DynamicSkyLighting';
+import { TimeOfDayProfile, TIME_OF_DAY_PROFILES } from '../utils/timeOfDayLighting';
 
 interface GlobeProps {
   memories: MemoryItem[];
@@ -15,6 +18,7 @@ interface GlobeProps {
   lastInteraction: React.MutableRefObject<number>;
   walkTargetIndex: number | null;
   viewMode?: 'sphere' | 'inside_dome' | 'orbit';
+  timeProfile?: TimeOfDayProfile;
   ambientLightColor?: string;
   ambientLightIntensity?: number;
   onSelect: (memory: MemoryItem) => void;
@@ -31,8 +35,9 @@ export default function Globe({
   lastInteraction,
   walkTargetIndex,
   viewMode = 'sphere',
-  ambientLightColor = '#ffffff',
-  ambientLightIntensity = 1.3,
+  timeProfile = TIME_OF_DAY_PROFILES.night,
+  ambientLightColor,
+  ambientLightIntensity,
   onSelect,
   onHover,
   onHoverOut,
@@ -45,13 +50,10 @@ export default function Globe({
   const cardLayout = useMemo(() => {
     const rawPositions = generateFibonacciSphere(totalPositions, GLOBE_RADIUS);
     return rawPositions.map((pos, i) => {
-      // Deterministic slight scale variation for visual rhythm
-      const seed = Math.sin(i * 999) * 0.5 + 0.5;
-      const scale = 0.8 + seed * 0.45;
       const memory = memories[i % memories.length] || memories[0];
       return {
         position: pos,
-        scale,
+        scale: 1.0,
         memory,
         index: i,
       };
@@ -60,6 +62,9 @@ export default function Globe({
 
   // Target rotation for Walk Mode targeting
   const targetRotation = useRef<{ x: number; y: number } | null>(null);
+
+  // Smooth blending factor for idle auto-rotation (0 = fully paused, 1 = full auto-spin)
+  const idleBlendRef = useRef<number>(0);
 
   useEffect(() => {
     if (walkTargetIndex !== null && cardLayout[walkTargetIndex]) {
@@ -103,8 +108,9 @@ export default function Globe({
 
       velocityState.current.x = 0;
       velocityState.current.y = 0;
+      idleBlendRef.current = 0;
     } else {
-      // User manual rotation or physics momentum
+      // 1. User manual rotation or physics momentum
       rotationState.current.x += velocityState.current.x;
       rotationState.current.y += velocityState.current.y;
 
@@ -114,18 +120,29 @@ export default function Globe({
         Math.min(Math.PI / 2.3, rotationState.current.x)
       );
 
+      const isInteracting = isDragging.current || Date.now() - lastInteraction.current < 1200;
+
       if (!isDragging.current) {
-        // Friction damping
+        // Momentum friction damping
         velocityState.current.x *= 0.93;
         velocityState.current.y *= 0.93;
 
-        // Ambient idle spin when untouched for > 2 seconds
-        if (Date.now() - lastInteraction.current > 2000) {
-          velocityState.current.y += 0.00012;
+        // Auto-rotation idle blending
+        if (isInteracting) {
+          // Rapidly ease out auto-rotation when user recently interacted
+          idleBlendRef.current = THREE.MathUtils.lerp(idleBlendRef.current, 0, Math.min(delta * 8.0, 0.25));
+        } else {
+          // Smoothly ease in slow planetary auto-rotation during inactivity
+          idleBlendRef.current = THREE.MathUtils.lerp(idleBlendRef.current, 1, Math.min(delta * 1.5, 0.04));
         }
+
+        // Apply slow continuous idle auto-spin around Y axis (constant ~0.0016 rad/frame speed)
+        const targetIdleSpeed = 0.0016;
+        rotationState.current.y += targetIdleSpeed * idleBlendRef.current;
       } else {
         velocityState.current.x *= 0.3;
         velocityState.current.y *= 0.3;
+        idleBlendRef.current = 0;
       }
     }
 
@@ -135,9 +152,9 @@ export default function Globe({
 
   return (
     <group ref={groupRef}>
-      <ambientLight intensity={ambientLightIntensity} color={ambientLightColor} />
-      <pointLight position={[0, 16, 20]} intensity={ambientLightIntensity * 0.55} color={ambientLightColor} />
-      <pointLight position={[0, -12, -16]} intensity={0.3} color="#ffffff" />
+      {/* Dynamic Time-of-Day Multi-Source Lighting System */}
+      <DynamicSkyLighting profile={timeProfile} />
+      <AmbientCelestialCore color={timeProfile.lighting.coreColor} viewMode={viewMode} />
       {cardLayout.map((item) => (
         <Card
           key={`${item.memory.id}-${item.index}`}
@@ -147,11 +164,15 @@ export default function Globe({
           scale={item.scale}
           isActive={activeMemoryId === item.memory.id}
           onSelect={(mem) => {
+            lastInteraction.current = Date.now();
             if (!isDragging.current) {
               onSelect(mem);
             }
           }}
-          onHover={onHover}
+          onHover={(mem) => {
+            lastInteraction.current = Date.now();
+            onHover?.(mem);
+          }}
           onHoverOut={onHoverOut}
         />
       ))}

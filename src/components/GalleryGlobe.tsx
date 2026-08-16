@@ -26,7 +26,7 @@ import MusicPlaylistBar from './MusicPlaylistBar';
 import SafeImage from './SafeImage';
 
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-const DEFAULT_CAMERA_Z = isMobile ? 26.5 : 19.5;
+const DEFAULT_CAMERA_Z = isMobile ? 22.0 : 17.0;
 
 function CameraController({ 
   targetZ, 
@@ -178,8 +178,8 @@ export default function GalleryGlobe({
       }
 
       const isInside = mode === 'inside_dome';
-      const wideZoomOutZ = isInside ? 1.8 : (isMobile ? 31.5 : 24.5);
-      const targetFocusZoomInZ = isInside ? -2.4 : (isMobile ? 16.5 : 12.8);
+      const wideZoomOutZ = isInside ? 1.5 : (isMobile ? 24.0 : 18.5);
+      const targetFocusZoomInZ = isInside ? -1.8 : (isMobile ? 20.0 : 15.5);
 
       animProxyRef.current.z = targetZ.current;
 
@@ -189,18 +189,18 @@ export default function GalleryGlobe({
         },
       });
 
-      // Stage 1: Zoom out smoothly for panoramic constellation view
+      // Stage 1: Subtle zoom adjustment
       tl.to(animProxyRef.current, {
         z: wideZoomOutZ,
-        duration: 0.75,
+        duration: 0.45,
         ease: 'power2.out',
       })
-      // Stage 2: Zoom in close to frame and highlight destination memory card
+      // Stage 2: Smooth settle on target card
       .to(animProxyRef.current, {
         z: targetFocusZoomInZ,
-        duration: 1.35,
-        ease: 'power3.inOut',
-        delay: 0.15,
+        duration: 0.85,
+        ease: 'power2.out',
+        delay: 0.05,
       });
 
       gsapTimelineRef.current = tl;
@@ -392,6 +392,7 @@ export default function GalleryGlobe({
 
   // Touch Pinch Zoom Handler
   const handleTouchMove = (e: React.TouchEvent) => {
+    lastInteractionTime.current = Date.now();
     if (e.touches.length === 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
       const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -407,6 +408,7 @@ export default function GalleryGlobe({
   };
 
   const handleTouchEnd = () => {
+    lastInteractionTime.current = Date.now();
     touchStartDist.current = null;
   };
 

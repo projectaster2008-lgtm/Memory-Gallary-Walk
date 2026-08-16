@@ -13,12 +13,11 @@ export default function App() {
     <div className="w-full h-full relative bg-white overflow-hidden select-none">
       {/* 3D Gallery Walk Canvas */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
+        initial={{ opacity: 0 }}
         animate={{
-          scale: selectedMemory ? 0.85 : 1,
-          opacity: selectedMemory ? 0.35 : 1,
+          opacity: selectedMemory ? 0.25 : 1,
         }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
         className={`absolute inset-0 ${selectedMemory ? 'pointer-events-none' : ''}`}
       >
         <GalleryGlobe

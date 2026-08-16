@@ -27,3 +27,5 @@ export interface DriveFolderInfo {
 }
 
 export type ViewMode = 'sphere' | 'inside_dome' | 'orbit';
+
+export type TimeOfDay = 'sunrise' | 'noon' | 'sunset' | 'night' | 'auto';
