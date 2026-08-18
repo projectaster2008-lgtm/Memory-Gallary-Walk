@@ -201,7 +201,9 @@ export default function Card({
   const rotationQuaternion = useMemo(() => {
     const dummy = new THREE.Object3D();
     dummy.position.copy(position);
-    dummy.lookAt(position.clone().multiplyScalar(2));
+    // Align card looking radially outward from center
+    const outwardTarget = position.clone().add(position.clone().normalize());
+    dummy.lookAt(outwardTarget);
     return dummy.quaternion.clone();
   }, [position]);
 

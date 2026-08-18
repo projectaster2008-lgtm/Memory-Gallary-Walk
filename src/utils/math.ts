@@ -6,15 +6,21 @@ import * as THREE from 'three';
  */
 export function generateFibonacciSphere(samples: number, radius: number = 1): THREE.Vector3[] {
   const points: THREE.Vector3[] = [];
-  const phi = Math.PI * (3 - Math.sqrt(5)); // Golden angle in radians
+  if (samples <= 0) return points;
+  if (samples === 1) {
+    points.push(new THREE.Vector3(0, 0, radius));
+    return points;
+  }
+
+  const phi = Math.PI * (3 - Math.sqrt(5)); // Golden angle in radians (~2.399963 rad)
 
   for (let i = 0; i < samples; i++) {
-    // y goes from 1 to -1
-    const y = 1 - (i / (samples - 1)) * 2;
-    // radius at y
-    const r = Math.sqrt(1 - y * y);
+    // y goes symmetrically from 1 - 1/samples down to -1 + 1/samples (avoids poles crowding)
+    const y = 1 - (2 * i + 1) / samples;
+    // radius at height y on unit sphere
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
 
-    // golden angle increment
+    // golden angle spiral
     const theta = phi * i;
 
     const x = Math.cos(theta) * r;

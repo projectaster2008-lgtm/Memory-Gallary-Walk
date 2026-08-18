@@ -258,28 +258,30 @@ Do not include any other text or introductory phrases.`,
     }
   });
 
-  // API endpoint for generative memory story / reflection - Clint's Narrative Voice (The Voice of 22)
+  // API endpoint for generative memory story / reflection - Clint's Authentic Story (Echoes of 22)
   app.post("/api/memory-story", async (req, res) => {
+    const { title, location, description, imageBase64, style } = req.body;
+    const selectedStyle = style || "Clint's Heart";
+
+    const defaultStory = `## 🌿 ${title || 'Remember this?'}
+**Mood**: Warm Nostalgia • Quiet Wonder
+
+Hahahaha. Remember noong nasa ${location || 'dito'} tayo? 
+
+Parang wala pa tayong masyadong plano noon diba, basta lakad lang. Pero nakakatuwa kasi looking back, yung mga simpleng kwentuhan, tawanan habang nagmamasid sa paligid—doon ko talaga na-realize kung gaano ka-special yung journey natin. Napaka-peaceful sa pakiramdam.
+
+Sobrang na-appreciate ko 'to. Thank you for always being with me.
+
+> 💡 *Clint's Reflection: Hindi nasusukat sa layo ng destinasyon ang biyahe... kundi sa taong katabi mo habang pinagmamasdan ang daan.*`;
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.json({ success: true, story: defaultStory });
+    }
+
     try {
-      const { title, location, description, imageBase64, style } = req.body;
-      const selectedStyle = style || "Clint's Heart";
-
-      if (!process.env.GEMINI_API_KEY) {
-        return res.json({
-          story: `## 🌿 ${title || 'Remember ani?'}
-**Atmosphere & Mood**: Warm Nostalgia • Quiet Wonder
-
-Hahahaha. Remember tong sa ${location || 'diri'}? 
-
-Murag wala pa jud tay klarong plan ato no, naglakaw-lakaw ra ta. Pero funny kaayo kay looking back, kanang gagmay nga moments—kanang mga simpleng estorya ug katawa samtang nagtan-aw ta sa palibot—dira jud nako na-realize unsa ka special ang journey nato. Ka-peaceful jud kaayo sa feeling.
-
-Na appreciate jud nako ni ug maayo. Thank you sa pag-uban pirmi.
-
-> 💡 *Clint's Reflection: Dili man sa destination masukod ang lakaw... naa jud sa tawo nga imong kauban nagtan-aw sa dalan.*`
-        });
-      }
-
       let parts: any[] = [];
+
+      // 1. If base64 image is provided, include it in multimodal prompt
       if (imageBase64) {
         const match = imageBase64.match(/^data:(image\/[a-zA-Z]*);base64,([^"]*)$/);
         if (match && match.length === 3) {
@@ -292,52 +294,141 @@ Na appreciate jud nako ni ug maayo. Thank you sa pag-uban pirmi.
         }
       }
 
+      // Specific Tone Instructions (Pure Taglish & English)
+      let toneInstructions = "";
+      switch (selectedStyle) {
+        case "Quiet Wonder":
+          toneInstructions = "Adopt a calm, peaceful, reflective tone. Notice the quiet surroundings, the breeze, the skyline, mountains, or sea. Speak in natural conversational Tagalog/English about the calming peace of simply being in the moment together without needing to rush.";
+          break;
+        case "Playful & Random":
+          toneInstructions = "Adopt a humorous, lighthearted, makulit tone. Chuckle at the unexpected, funny moments—like getting drenched in the rain, crazy traffic, funny candid faces, spontaneous food trips, or random laughs. Keep it lively and full of good vibes.";
+          break;
+        case "Pasalamat & Gratitude":
+          toneInstructions = "Adopt a deeply grateful and sincere tone. Express heartfelt thanks to God for guiding and protecting the journey, and thank Maica for her patience, unconditional care, and walking together through every season.";
+          break;
+        case "Midnight Reflections":
+          toneInstructions = "Adopt a cozy, mellow, late-night introspective tone (gabi thoughts). Reflect on how much you've both grown, the lessons learned along the road, and the quiet comfort of having each other as you look toward the future.";
+          break;
+        case "Clint's Heart":
+        default:
+          toneInstructions = "Adopt Clint's signature heartfelt, observant voice. Blend natural warmth, a light chuckle, observant appreciation of small shared moments, and a tender, grounded reminder of how much this journey means to you.";
+          break;
+      }
+
       parts.push({
-        text: `You are Clint (the narrative voice and heart of "22" in Echoes). You are looking at a shared memory photo with Maica, sitting quietly right beside her.
+        text: `You are Clint—the real, loving partner of Maica in this memory sphere gallery ("22").
+You are sitting side-by-side with Maica, looking at this specific memory photo/video, reminiscing together in real-time.
 
-CRITICAL VOICE & PERSONALITY BLUEPRINT:
-1. Core Identity: You are never trying to impress or sound like an AI. You sound like Clint—warm, observant, observant of small details, turning ordinary moments into gentle symbols.
-2. Language: Effortless conversational Taglish with natural Bisaya touches (e.g., "Hahahaha", "Bitaw no", "Murag...", "Grabe", "Kaayo", "No?", "Diba?", "Actually...", "Nahinumdom ko", "Remember tong...", "Fast forward ta", "Cute kaayo", "Beautiful jud", "Na appreciate jud nako"). Do NOT make it textbook or stiff.
-3. Thinking Pattern & Symbolism: Turn literal things into meaning (motorcycle = shared journey, rain = unexpected blessing, mountain = peace, sunsets/clouds = quiet wonder, holding hands = walking the same direction).
-4. Flow Rhythm:
-   - Observe & warm laugh ("Hahahaha. Remember ani?")
-   - Describe sensory details (the breeze, the light, small funny things)
-   - Reflect & find meaning without being dramatic or preachy
-   - Quiet gratitude ("Na appreciate jud nako ni", "Thank you")
-5. Perspective Style requested: "${selectedStyle}"
+STRICT COMMUNICATION STYLE & LANGUAGE RULES:
+1. Language: ONLY natural conversational Taglish (Filipino/Tagalog + English). Natural, everyday modern conversational flow (e.g. "Hahahaha", "Diba no?", "Actually...", "Remember nung...", "Grabe", "Sobrang na-appreciate ko", "Thank you talaga", "Ang saya lang balikan").
+2. No Bisaya/Cebuano words. Only Tagalog and English (Taglish).
+3. Sound 100% human and intimate. Never sound like an AI, an essay, or a bot. No formal greetings, no robotic structures.
+4. Symbolism & Meaning:
+   - Turn everyday experiences into gentle metaphors (motorcycle rides = navigating life together; rain/floods = weathering life's storms; quiet views = shared calm; holding hands = walking the same path).
+5. Tone Mode: ${selectedStyle}
+   ${toneInstructions}
 
-Memory Context:
-Title: "${title || 'Cherished Memory'}"
-Location: "${location || 'Somewhere Special'}"
-Notes: "${description || 'None'}"
+Memory Details:
+- Title: "${title || 'Cherished Memory'}"
+- Location: "${location || 'Memories on the Globe'}"
+- Context/Notes: "${description || 'Captured memory'}"
 
-OUTPUT FORMAT (Clean Markdown):
-## 🌿 [Natural, warm title e.g., Remember tong sa ${location || 'diri'}?]
-**Atmosphere & Mood**: [2-3 words, e.g. Warm Nostalgia • Quiet Wonder]
+OUTPUT FORMAT (Must strictly use this clean Markdown structure):
+## 🌿 [Creative, warm title in Clint's natural voice e.g., Remember noong sa ${location || 'dito'}?]
+**Mood**: [2-3 words describing the feeling, e.g., Warm Nostalgia • Quiet Wonder]
 
-[2 short, deeply heartfelt paragraphs in Clint's natural Taglish/Bislish voice. Start with a warm chuckle or memory trigger like "Hahahaha", "Bitaw no", or "Actually...". Notice tiny details, reflect on the feeling of being right there together, and show quiet appreciation.]
+[Paragraph 1: A warm, authentic opening with Clint's characteristic chuckle or memory trigger ("Hahahaha", "Diba no...", "Remember nung..."). Vividly describe what's happening in this memory, noting sensory details, the weather, small candid moments, or what made this special.]
 
-> 💡 *Clint's Reflection: [One meaningful, poignant one-liner turning this moment into a gentle life symbol or quiet word of gratitude.]*`
+[Paragraph 2: Clint's deeper reflection on what this moment meant, how it felt to be right there together with Maica, and a heartfelt expression of love or appreciation in natural Taglish.]
+
+> 💡 *Clint's Reflection: [One poignant, grounding sentence turning this moment into a life lesson, symbol of your journey, or quiet token of gratitude.]*`
       });
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
-        contents: { parts },
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: { parts },
+        });
+      } catch {
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash-lite',
+          contents: { parts },
+        });
+      }
+
+      if (response && response.text) {
+        return res.json({ success: true, story: response.text });
+      }
+      return res.json({ success: true, story: defaultStory });
+    } catch {
+      return res.json({
+        success: true,
+        story: defaultStory,
       });
+    }
+  });
 
-      res.json({ success: true, story: response.text });
-    } catch (e: any) {
-      console.error("Memory story error:", e);
-      res.status(500).json({
-        success: false,
-        story: `## 🌿 Remember ani?
-**Atmosphere & Mood**: Warm Nostalgia • Quiet Wonder
+  // API endpoint for Outside Casual Thoughts / Wandering Commentary
+  app.post("/api/globe-narration", async (req, res) => {
+    const { title, location, description, stepNumber } = req.body;
 
-Hahahaha. Beautiful jud kaayo ni nga memory. Dili man kailangan ug grand plan para mahimong unforgettable ang usa ka lugar—basta magkauban ta, murag tanan mahimong peace.
+    const dynamicRemarks = [
+      `Hahahaha, ang lamig pa naman ng hangin sa ${location || 'lugar na ito'} noon.`,
+      `Diba ito yung time na sobrang nag-enjoy tayo sa biyahe papunta ${location || 'dito'}?`,
+      `Ang sarap lang maglakad-lakad nang walang minamadali sa ${location || 'lugar na ito'}.`,
+      `Sobrang solid nung ride papunta rito, hindi ko makakalimutan.`,
+      `Naalala ko yung mga kwentuhan natin habang pinapanood yung view noon.`,
+      `Ang peaceful lang talaga ng lugar na 'to kasama ka.`
+    ];
+    const defaultRemark = dynamicRemarks[Math.floor(Math.random() * dynamicRemarks.length)];
 
-Na appreciate jud nako ni. Thank you kaayo.
+    if (!process.env.GEMINI_API_KEY) {
+      return res.json({
+        success: true,
+        narration: defaultRemark,
+      });
+    }
 
-> 💡 *Clint's Reflection: Ang pinakanindot nga memories, dili kadtong giplano... kundi kadtong mga higayon nga naglingkod lang ta ug nagpasalamat.*`
+    try {
+      const parts = [{
+        text: `You are Clint wandering casually around this 3D memory sphere world. 
+You are casually thinking out loud or making a spontaneous, natural remark to yourself or to Maica as you look at the view.
+
+Context:
+- Current spot: "${title || 'Special Place'}" (${location || 'Somewhere Special'})
+- Details: "${description || 'A cherished memory'}"
+- Memory number: ${stepNumber || 1}
+
+Rules:
+- 1 short, super casual sentence (10-18 words max).
+- Pure natural Taglish (conversational Tagalog + English) in Clint's casual, humble, and observant personality.
+- Examples of vibe: 
+  - "Hahahaha grabe, ang lamig pa naman ng hangin dito noon."
+  - "Diba ito yung time na nagutom tayo sa biyahe pero ang saya pa rin?"
+  - "Ang peaceful lang talaga ng lugar na 'to, sarap balikan."
+  - "Sobrang solid nung ride papunta rito, hindi ko makakalimutan."
+- No quotes, no markdown, no emojis, no hashtags. Just the casual remark text.`
+      }];
+
+      let response;
+      try {
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: { parts },
+        });
+      } catch {
+        response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash-lite',
+          contents: { parts },
+        });
+      }
+
+      return res.json({ success: true, narration: response.text?.trim() || defaultRemark });
+    } catch {
+      return res.json({
+        success: true,
+        narration: defaultRemark,
       });
     }
   });

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   X, 
-  Sparkles, 
   Video, 
   ExternalLink, 
   Calendar, 
@@ -48,11 +47,12 @@ export default function LocationDetailsScreen({
     isVideoMemory ? 'video' : 'story'
   );
   
-  // Hardcoded Default Story State
+  // Story State & In-Memory Cache
   const [selectedTone, setSelectedTone] = useState("Clint's Heart");
-  const [aiStory, setAiStory] = useState<string>(() => memory.aiStory || getHardcodedStory(memory, "Clint's Heart"));
+  const [aiStory, setAiStory] = useState<string>('');
   const [isStoryLoading, setIsStoryLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const storyCacheRef = useRef<Record<string, string>>({});
 
   // Speech Narration State
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -81,16 +81,20 @@ export default function LocationDetailsScreen({
     };
   }, []);
 
-  // Update or switch AI Memory Story
-  const handleGenerateStory = async (tone = selectedTone) => {
+  // Actively Generate Story using Gemini AI with Clint's authentic personality
+  const handleGenerateStory = async (tone = selectedTone, forceRegenerate = false) => {
     stopSpeech();
-    
-    // 1. Immediately switch to hardcoded bespoke story
-    const instantStory = getHardcodedStory(memory, tone);
-    setAiStory(instantStory);
-    memory.aiStory = instantStory;
+    const cacheKey = `${memory.id}_${tone}`;
 
-    // 2. If online and API is accessible, optionally enhance
+    // If cached and not forcing fresh generation, load immediately
+    if (!forceRegenerate && storyCacheRef.current[cacheKey]) {
+      setAiStory(storyCacheRef.current[cacheKey]);
+      memory.aiStory = storyCacheRef.current[cacheKey];
+      return;
+    }
+
+    setIsStoryLoading(true);
+
     try {
       const res = await fetch('/api/memory-story', {
         method: 'POST',
@@ -100,31 +104,41 @@ export default function LocationDetailsScreen({
           location: memory.location,
           description: memory.description,
           style: tone,
+          driveFileId: memory.driveFileId,
+          imageUrl: memory.imageUrl,
         }),
       });
+
       if (res.ok) {
         const data = await res.json();
         if (data.story) {
+          storyCacheRef.current[cacheKey] = data.story;
           setAiStory(data.story);
           memory.aiStory = data.story;
+          setIsStoryLoading(false);
+          return;
         }
       }
+      throw new Error('API did not return a valid story');
     } catch {
-      // Seamlessly stay on hardcoded story
+      // Graceful fallback to rich default narrative in case of network interruption
+      const fallback = getHardcodedStory(memory, tone);
+      setAiStory(fallback);
+      memory.aiStory = fallback;
+    } finally {
+      setIsStoryLoading(false);
     }
   };
 
-  // Sync state on memory change
+  // Sync and generate story on memory change or tone change
   useEffect(() => {
     stopSpeech();
-    const activeStory = memory.aiStory || getHardcodedStory(memory, selectedTone);
-    setAiStory(activeStory);
-    memory.aiStory = activeStory;
+    handleGenerateStory(selectedTone, false);
 
     if (isVideoMemory) {
       setActiveTab('video');
     }
-  }, [memory.id, isVideoMemory, selectedTone]);
+  }, [memory.id, selectedTone, isVideoMemory]);
 
   // Read aloud narration
   const handleToggleSpeech = () => {
@@ -389,7 +403,7 @@ export default function LocationDetailsScreen({
                       : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <Feather className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Kwento ni Clint (22)</span>
                 </button>
 
@@ -470,47 +484,61 @@ export default function LocationDetailsScreen({
               {activeTab === 'story' && (
                 <div className="space-y-3">
                   {/* Story Tone Selector Pills */}
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                    <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1 mr-1">
-                      <Feather className="w-3 h-3" />
-                      <span>Tone:</span>
-                    </span>
-                    {STORY_TONES.map((tone) => (
-                      <button
-                        key={tone.id}
-                        onClick={() => {
-                          setSelectedTone(tone.id);
-                          handleGenerateStory(tone.id);
-                        }}
-                        disabled={isStoryLoading}
-                        className={`text-[11px] px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap flex items-center gap-1 ${
-                          selectedTone === tone.id
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                            : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-transparent'
-                        }`}
-                      >
-                        <span>{tone.icon}</span>
-                        <span>{tone.label}</span>
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-between gap-1.5 overflow-x-auto pb-1">
+                    <div className="flex items-center gap-1.5 overflow-x-auto">
+                      <span className="text-[11px] text-gray-400 font-medium flex items-center gap-1 mr-1 flex-shrink-0">
+                        <Feather className="w-3 h-3" />
+                        <span>Tone:</span>
+                      </span>
+                      {STORY_TONES.map((tone) => (
+                        <button
+                          key={tone.id}
+                          onClick={() => {
+                            setSelectedTone(tone.id);
+                            handleGenerateStory(tone.id, false);
+                          }}
+                          disabled={isStoryLoading}
+                          className={`text-[11px] px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap flex items-center gap-1 cursor-pointer ${
+                            selectedTone === tone.id
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs'
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-transparent'
+                          }`}
+                        >
+                          <span>{tone.icon}</span>
+                          <span>{tone.label}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* AI Story Output */}
-                  <div className="text-gray-700 text-sm leading-relaxed">
+                  {/* Memory Story Output */}
+                  <div className="text-gray-700 text-sm leading-relaxed min-h-[140px] flex flex-col justify-center">
                     {isStoryLoading ? (
                       <div className="flex flex-col items-center justify-center py-10 gap-3 text-gray-400">
-                        <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
-                        <p className="text-xs font-medium text-gray-600">
-                          Composing {selectedTone.toLowerCase()} story narrative...
+                        <div className="relative">
+                          <Loader2 className="w-7 h-7 animate-spin text-emerald-600" />
+                          <Feather className="w-3 h-3 text-emerald-500 absolute -top-1 -right-1 animate-bounce" />
+                        </div>
+                        <p className="text-xs font-semibold text-gray-700">
+                          Sinusulat ang kwento...
+                        </p>
+                        <p className="text-[11px] text-gray-400">
+                          Binabalikan ang mga alaala sa {selectedTone.toLowerCase()}
                         </p>
                       </div>
                     ) : aiStory ? (
                       <div className="prose prose-sm max-w-none [&>h2]:text-base [&>h2]:font-bold [&>h2]:text-gray-900 [&>p]:mb-2.5 [&>blockquote]:border-l-2 [&>blockquote]:border-emerald-500 [&>blockquote]:pl-3.5 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:bg-emerald-50/50 [&>blockquote]:py-1 [&>blockquote]:rounded-r-lg">
+                        <div className="flex items-center gap-1.5 mb-2.5">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold tracking-wide border border-emerald-200">
+                            <Feather className="w-3 h-3 text-emerald-600" />
+                            <span>Kwento ni Clint • Alaala</span>
+                          </span>
+                        </div>
                         <Markdown>{aiStory}</Markdown>
                       </div>
                     ) : (
                       <p className="text-gray-500 italic">
-                        {memory.description || 'A timeless moment captured in the memory sphere.'}
+                        {memory.description || 'Isang mahalagang sandali na nakatago sa memory sphere.'}
                       </p>
                     )}
                   </div>
@@ -570,19 +598,19 @@ export default function LocationDetailsScreen({
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handleGenerateStory(selectedTone)}
+                onClick={() => handleGenerateStory(selectedTone, true)}
                 disabled={isStoryLoading}
-                className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1.5"
+                className="px-3 py-1.5 text-xs text-gray-700 hover:text-gray-950 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Re-narrate</span>
+                <Feather className={`w-3.5 h-3.5 text-emerald-600 ${isStoryLoading ? 'animate-spin' : ''}`} />
+                <span>{isStoryLoading ? 'Sinusulat...' : 'Iba Pang Kwento'}</span>
               </button>
 
               <button
                 onClick={onClose}
-                className="px-4 py-1.5 text-xs font-medium bg-gray-900 hover:bg-black text-white rounded-lg transition-colors"
+                className="px-4 py-1.5 text-xs font-medium bg-gray-900 hover:bg-black text-white rounded-lg transition-colors cursor-pointer"
               >
-                Back to Walk
+                Balik sa Lakad
               </button>
             </div>
           </div>

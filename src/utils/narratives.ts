@@ -11,100 +11,150 @@ export const STORY_TONES: StoryTone[] = [
   { id: 'Quiet Wonder', label: 'Quiet Wonder', icon: '🌿' },
   { id: 'Playful & Random', label: 'Hahaha / Random', icon: '😄' },
   { id: 'Pasalamat & Gratitude', label: 'Pasalamat', icon: '✨' },
+  { id: 'Midnight Reflections', label: 'Gabi Reflections', icon: '🌙' },
 ];
 
 /**
- * Curated hardcoded stories tailored to specific moments, videos, and locations.
+ * Curated hardcoded default stories in pure conversational Taglish (Tagalog + English)
  */
 export const BESPOKE_STORIES: Record<string, Record<string, string>> = {
   // Pangilatan Reconciliation Moment Video
   '1ax70qLbZOM0ktjUXIf2Hsc3AbWD83WL_': {
     "Clint's Heart": `## 🌿 Pangilatan Reconciliation Moment
-**Atmosphere & Mood**: Heartfelt Peace • Pure Gratitude
+**Mood**: Heartfelt Peace • Pure Gratitude
 
-Hahahaha. Bitaw no, kanang makatan-aw ko ani nga video, murag mubalik jud tanan ang gibati ato nga adlaw sa Pangilatan. Kahibalo ka nang usahay naay mga dili pagsinabtanay, pero sa tinuod lang, kadtong pagkita ug pag-istorya nato didto, nawala tanan ang bug-at sa dughan.
+Hahahaha. Diba no, kapag napapanood ko itong video na 'to, bumabalik talaga lahat ng naramdaman ko noong araw na 'yon sa Pangilatan. Alam mo naman minsan may mga hindi pagkakaintindihan, pero sa totoo lang, nung nagkita at nag-usap tayo doon, nawala lahat ng bigat sa dibdib.
 
-Grabe ka special ani nga higayon. Dili lalim pero worth it kaayo kay kahibalo ko unsa ka importante ka para nako. Na appreciate jud nako imong pagsabot ug pagpaminaw ato.
+Grabe ka-special ng moment na 'to. Hindi madali pero worth it talaga kasi alam ko kung gaano ka kahalaga sa akin. Sobrang na-appreciate ko yung pag-intindi at pakikinig mo noon.
 
-> 💡 *Clint's Reflection: Ang tinuod nga panag-uban dili masukod sa walay away, kundi sa kasingkasing nga andam mopasaylo ug maglakaw pag-usab nga magkauban.*`,
+> 💡 *Clint's Reflection: Ang tunay na pagsasama hindi nasusukat sa kawalan ng tampuhan, kundi sa pusong handang magpatawad at maglakad muli nang magkasama.*`,
     'Quiet Wonder': `## 🌿 The Quiet Path of Healing
-**Atmosphere & Mood**: Serene Horizon • Gentle Grace
+**Mood**: Serene Horizon • Gentle Grace
 
-There is a quiet stillness in the mountains of Pangilatan that makes the loudest worries simply fade away. Watching this moment brings back the fresh breeze and the quiet realization of what truly endures.
+There is a quiet stillness in the mountains of Pangilatan that makes the loudest worries simply fade away. Looking at this moment brings back the cool fresh breeze and the peaceful realization of what truly matters.
 
 Sometimes life asks us to slow down, listen to the silent spaces between words, and choose love all over again.
 
 > 💡 *Clint's Reflection: In the quiet sanctuary of nature, hearts always find their way back home.*`,
-    'Playful & Random': `## 🌿 Hahaha Remember Pagkahuman sa Away?
-**Atmosphere & Mood**: Kulitan • Good Vibes Only
+    'Playful & Random': `## 🌿 Hahaha Remember Noong Pagkatapos Magtampo?
+**Mood**: Kulitan • Good Vibes
 
-Hahaha grabe jud to nga drama pero tan-awa ra, pag-abot sa Pangilatan nanga-okay ra diay gihapon ta. Murag nadala ra sa kabugnaw sa hangin ug sa kalami sa talan-awon ba!
+Hahaha grabe yung drama noon pero tignan mo naman, pagdating sa Pangilatan naging okay din tayo agad. Parang nadala lang sa simoy ng hangin at sa ganda ng view eh!
 
-Cute kaayo tan-awon karon kay makatawa nalang ta. At least naa tay resibo nga maski unsa pay mahitabo, solid gihapon ta.
+Ang cute lang tignan ngayon kasi natatawa na lang tayo. At least may resibo tayo na kahit ano pa mangyari, solid pa rin tayo.
 
-> 💡 *Clint's Reflection: Bisan unsa pa kalubog ang sabaw, magka-clear ra gihapon basta magka-storya ug tarong.*`,
+> 💡 *Clint's Reflection: Kahit gaano kalabo minsan, lumilinaw din ang lahat basta maayos na nag-uusap.*`,
     'Pasalamat & Gratitude': `## 🌿 Pasalamat sa Pangilatan
-**Atmosphere & Mood**: Sacred Grace • Undying Appreciation
+**Mood**: Sacred Grace • Heartfelt Gratitude
 
-Salamat kaayo Ginoo sa higayon nga natagaan ta ug peace ato nga adlaw. Sa Pangilatan, na-remind ko unsa ka bililhon ang panag-uban nato ni Maica.
+Salamat sa Panginoon sa kapayapaan na binigay sa atin noong araw na 'yon. Sa Pangilatan, na-remind ako kung gaano kahalaga ang bawat araw na magkasama tayo ni Maica.
 
-Salamat sa imong pasensya, sa imong kasingkasing, ug sa pagpili nga mag-uban gihapon ta sa unahan. Dili nako ni makalimtan.
+Salamat sa pasensya mo, sa puso mo, at sa pagpiling magpatuloy kasama ako. Hinding-hindi ko 'to makakalimutan.
 
-> 💡 *Clint's Reflection: Ang matag higayon nga magkauli ang kasingkasing, usa ka gasa nga angay ipasalamat adlaw-adlaw.*`,
+> 💡 *Clint's Reflection: Ang bawat sandali ng muling paglalapit ng puso ay isang regalong dapat ipagpasalamat araw-araw.*`,
   },
 
   // Flood Adventures 1
   '1t0B57lu98Q3anDBd47IMfiXekfeOPOEJ': {
-    "Clint's Heart": `## 🌿 Wild Weather & Torrential Waters
-**Atmosphere & Mood**: Adrenaline • Resilient Bond
+    "Clint's Heart": `## 🌿 Wild Weather & Flood Ride
+**Mood**: Adrenaline • Resilient Bond
 
-Hahahaha! Remember tong baha samtang nagbyahe ta? Grabe to nga uwan, murag halos dili na makita ang dalan sa kakusog sa agas sa tubig. 
+Hahahaha! Remember nung naipit tayo sa baha habang nagbi-byahe? Grabe yung ulan noon, halos hindi na makita ang daan sa lakas ng tubig.
 
-Pero kahibalo ka unsa ang pinaka-memorable ato? Bisan basa na kaayo ta ug medyo kuyaw ang dalan, wala jud ta nagkabalaka kay magkauban man ta. Na-enjoy pa gani nato ang kalisod sa byahe.
+Pero alam mo kung ano ang pinaka-memorable doon? Kahit basang-basa na tayo at medyo delikado ang daan, hindi tayo nataranta kasi magkasama tayo. Na-enjoy pa nga natin yung adventure.
 
-> 💡 *Clint's Reflection: Dili tanang uwan nagdalag unos... usahay gasa kini aron testingan ug palig-unon ang atong panaw.*`,
+> 💡 *Clint's Reflection: Hindi lahat ng bagyo ay dumarating para manira... minsan dumarating ito para subukin at patatagin ang ating pagsasama.*`,
   },
 
   // Gullas Mountain Heights
   '1qYVjeokub4tqES8a5xWSJP8tUc4S7UpS': {
     "Clint's Heart": `## 🌿 Gullas Mountain Breeze & High Views
-**Atmosphere & Mood**: Mountain Freedom • Breezy Peace
+**Mood**: Mountain Freedom • Breezy Peace
 
-Hahahaha. Kanang hangin sa Gullas Mountain jud ba, lahi ra kaayo ang freshness! Pag-abot nato sa ibabaw, murag nahibilin sa ubos ang tanang kapoy ug huna-huna.
+Hahahaha. Ibang klase talaga yung hangin sa Gullas Mountain, ang sarap sa pakiramdam! Pagdating natin sa tuktok, parang naiwan sa baba lahat ng pagod at alalahanin.
 
-Naglingkod ra ta ato, nagtan-aw sa layo nga horizon. Kanang simpleng pagpahuway nga naay kape ug bugnaw nga hangin, dira nako na-feel unsa ka nindot ang kinabuhi.
+Upo lang tayo noon, tahimik na nakatingin sa malawak na horizon. Yung simpleng pagpahinga na may mainit na kape at malamig na simoy, doon ko naramdaman kung gaano kaganda ang buhay.
 
-> 💡 *Clint's Reflection: Sa kinatumyan sa bukid, imong maamgohan nga ang pinakanindot nga view mao kadtong naay kauban ka nga magpabilin bisan unsa pa katungas ang dalan.*`,
+> 💡 *Clint's Reflection: Sa tuktok ng bundok, mas malinaw mong makikita kung ano ang totoong mahalaga sa iyong puso.*`,
   },
 
   // Beach Hangout
   '1pHq63-BgmAGal8kEkl33kmFSKteWdLNB': {
-    "Clint's Heart": `## 🌿 Baybayon, Balod ug Bulawanong Adlaw
-**Atmosphere & Mood**: Golden Coast • Warm Solace
+    "Clint's Heart": `## 🌿 Baybayin, Alon at Gintong Araw
+**Mood**: Golden Coast • Warm Solace
 
-Hahahaha. Ang beach jud ang pinaka-relaxing nga tambayan no? Kadtong tingog sa balod ug ang init sa balas sa atong mga tiil, murag nagpahunong sa oras.
+Hahahaha. Ang beach talaga ang pinaka-relaxing na tambayan natin diba? Yung tunog ng mga alon at ang init ng buhangin sa ating mga paa, parang pinapatigil ang oras.
 
-Wala tay gibuhat nga grand, naglakaw-lakaw ra ta ug nagpabugnaw. Pero kanang mga ing-ani nga adlaw ang pirmi nako hinumduman kung kapoyon ko sa adlaw-adlaw nga trabaho.
+Wala tayong ginawang engrande, naglakad-lakad lang tayo at nagpahangin. Pero itong mga simpleng araw na 'to ang madalas kong naaalala kapag napapagod ako.
 
-> 💡 *Clint's Reflection: Sama sa balod nga mubalik kanunay sa baybayon, ang kasingkasing kanunay makakaplag og kalinaw sa lugar diin kini gipangga.*`,
+> 💡 *Clint's Reflection: Tulad ng alon na laging bumabalik sa dalampasigan, ang puso ay laging nakakahanap ng kapayapaan sa piling ng taong mahalaga dito.*`,
   },
 
   // Long Rides 1
   '1Or8orG13J4pw6-gmoZjDibGDVSCfjclb': {
     "Clint's Heart": `## 🌿 Scenic Highway Long Ride
-**Atmosphere & Mood**: Open Road Freedom • Two Hearts Moving
+**Mood**: Open Road Freedom • Two Hearts Moving
 
-Hahahaha! Kanang feeling samtang nagdagan ang motor sa open highway, kusog ang hangin sa helmet unya gakos ka sa likod—grabe ka peaceful!
+Hahahaha! Yung pakiramdam habang tumatakbo ang motor sa open highway, malakas ang hangin sa helmet tapos naka-yakap ka sa likod—sobrang peaceful talaga!
 
-Dili man importante asa ta padulong jud ato nga ride, ang lami ato kay ang dalan mismo ug ang kahapsay sa atong byahe. Fast forward ta sa daghan pa nga long rides sa unahan!
+Hindi naman importante kung saan tayo eksaktong pupunta nung ride na 'yon, ang masarap doon ay yung mismong biyahe at yung safe na paglalakbay natin. Marami pa tayong long rides na pupuntahan!
 
-> 💡 *Clint's Reflection: Ang motor dili lang sakyanan... simbolo kini sa atong pagpadayon sa unahan, abaga sa abaga, bisan asa pa padulong ang dalan.*`,
+> 💡 *Clint's Reflection: Ang motor ay hindi lang sasakyan... simbolo ito ng tuloy-tuloy nating pag-abante sa buhay, magkaagapay saanman patungo ang daan.*`,
   },
 };
 
 /**
- * Returns a rich, tailored default story in Clint's conversational voice
- * for any given memory and tone.
+ * Curated casual roaming remarks for 3D sphere walk mode (instant, zero rate-limit)
+ */
+export const CASUAL_ROAMING_REMARKS: string[] = [
+  "Hahahaha grabe, ang lamig pa naman ng hangin dito noon.",
+  "Diba ito yung time na nagutom tayo sa biyahe pero ang saya pa rin?",
+  "Ang peaceful lang talaga ng lugar na 'to, sarap balikan.",
+  "Sobrang solid nung ride papunta rito, hindi ko makakalimutan.",
+  "Naalala ko yung tawa mo rito nung muntik tayong maligaw.",
+  "Ang ganda ng lighting dito sa picture, parang pelikula.",
+  "Isa 'to sa mga paborito kong lakad kasama ka.",
+  "Kahit gaano kalayo ang biyahe, ang bilis ng oras kapag magkasama tayo.",
+  "Sarap magkape habang pinapanood yung view noon.",
+  "Dito ko na-realize kung gaano kasarap maglakad-lakad nang walang minamadali.",
+  "Tignan mo yung ulap dito, ang ganda ng hugis.",
+  "Ang saya balikan ng mga simpleng araw na 'to.",
+];
+
+export function getQuickRoamingRemark(memory: Partial<MemoryItem>): string {
+  const loc = (memory.location || '').toLowerCase();
+  const title = (memory.title || '').toLowerCase();
+
+  if (loc.includes('pangilatan') || title.includes('pangilatan')) {
+    const list = [
+      "Hahahaha sarap ng simoy ng hangin sa Pangilatan, napaka-peaceful.",
+      "Sobrang ganda ng view dito sa ridge ng Pangilatan, walang kapantay.",
+      "Isa sa pinakamakabuluhang araw natin sa Pangilatan 'to.",
+    ];
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  if (loc.includes('gullas') || title.includes('gullas')) {
+    return "Malamig ang hangin sa Gullas Mountain, sarap magpahinga habang nakatanaw sa malayo.";
+  }
+
+  if (loc.includes('flood') || title.includes('flood')) {
+    return "Hahaha grabe yung baha noon! Basang-basa tayo pero tawa pa rin tayo nang tawa.";
+  }
+
+  if (loc.includes('ride') || title.includes('ride') || memory.isVideo) {
+    return "Sobrang sarap ng pakiramdam sa open highway habang umaandar ang motor.";
+  }
+
+  if (loc.includes('beach') || loc.includes('coast') || title.includes('beach')) {
+    return "Yung tunog ng mga alon at hangin sa dagat, sobrang nakaka-relax talaga.";
+  }
+
+  return CASUAL_ROAMING_REMARKS[Math.floor(Math.random() * CASUAL_ROAMING_REMARKS.length)];
+}
+
+/**
+ * Returns a rich, tailored default story in Clint's conversational Taglish voice
  */
 export function getHardcodedStory(memory: Partial<MemoryItem>, tone = "Clint's Heart"): string {
   const fileId =
@@ -126,97 +176,85 @@ export function getHardcodedStory(memory: Partial<MemoryItem>, tone = "Clint's H
   const location = memory.location || 'Echoes Memory';
   const isVideo = memory.isVideo;
 
-  // 2. Category & Location specific tailored generation
+  // 2. Location specific defaults
   if (location.toLowerCase().includes('pangilatan') || title.toLowerCase().includes('pangilatan')) {
     if (tone === 'Quiet Wonder') {
       return `## 🌿 The Quiet Sanctuary of Pangilatan
-**Atmosphere & Mood**: Mountain Serenity • Pure Solace
+**Mood**: Mountain Serenity • Pure Solace
 
-High in the verdant ridges of Pangilatan, sunlight filters through the canopy in delicate rays. Every leaf and trail feels untouched, holding a quiet stillness that invites you to breathe deeply.
+High in the ridges of Pangilatan, sunlight filters through the canopy in delicate rays. Every trail holds a quiet stillness that invites you to take a deep breath.
 
-Standing here together, surrounded by the expanse of emerald hills, you realize how precious these tranquil pauses in life truly are.
+Standing here together, surrounded by the emerald landscape, you realize how precious these peaceful moments truly are.
 
 > 💡 *Clint's Reflection: Nature does not hurry, yet everything is accomplished. Some places teach us how to simply be present together.*`;
     }
     if (tone === 'Playful & Random') {
-      return `## 🌿 Hahaha Katkat Moments sa Pangilatan!
-**Atmosphere & Mood**: Adventure Vibes • Good Laughs
+      return `## 🌿 Hahaha Adventure Moments sa Pangilatan!
+**Mood**: Adventure Vibes • Good Laughs
 
-Hahahaha! Remember tong pagsaka nato diri? Murag hapit na ta mahutdan ug hangin sa tungas, pero pag-abot sa taas nawala tanang kapoy kay pwerting nindota sa view!
+Hahahaha! Remember nung umakyat tayo rito? Parang hingal na hingal tayo sa ahon, pero pagdating sa tuktok nawala lahat ng pagod kasi sobrang ganda ng view!
 
-Pang-picture kaayo ang lighting ato no. Abi nakog mag-reklamo ka sa kalayo, pero game kaayo ka. Idol jud!
+Pang-wallpaper yung lighting noon diba? Akala ko magrereklamo ka sa layo, pero game na game ka. Galing talaga!
 
-> 💡 *Clint's Reflection: Bisan kapoy ang tungason, dali ra kaayo ang lakaw basta naay kauban nga sige'g pakatawa.*`;
+> 💡 *Clint's Reflection: Kahit nakakapagod ang ahon, nagiging madali ang lakad basta may kasama kang palaging nagpapatawa.*`;
     }
     if (tone === 'Pasalamat & Gratitude') {
-      return `## 🌿 Pasalamat sa mga Lakaw sa Pangilatan
-**Atmosphere & Mood**: Sincere Thanks • Peaceful Sanctuary
+      return `## 🌿 Pasalamat sa mga Lakad sa Pangilatan
+**Mood**: Sincere Thanks • Peaceful Sanctuary
 
-Dako kaayo akong pasalamat sa Ginoo sa kalinaw nga atong nasinati diri sa Pangilatan. Sa tunga sa ka-busy sa kinabuhi, kining mga adlawa ang naghatag nato ug kusog ug kalinaw.
+Sobrang nagpapasalamat ako sa Panginoon sa kapayapaan na naramdaman natin dito sa Pangilatan. Sa gitna ng busy nating buhay, ang mga ganitong araw ang nagbibigay sa atin ng bagong lakas.
 
-Salamat Maica sa pag-uban pirmi sa akong mga lakaw ug rides. Na appreciate jud nako ni ug dako kaayo.
+Salamat Maica sa pagsama palagi sa mga lakad at rides ko. Sobrang na-appreciate ko 'to.
 
-> 💡 *Clint's Reflection: Ang kalinaw sa kinaiyahan usa ka pahinumdom nga gipangga ug giyahan kita sa matag lakang sa atong panaw.*`;
+> 💡 *Clint's Reflection: Ang kapayapaan sa kalikasan ay paalala na pinangangalagaan at ginagabayan tayo sa bawat hakbang ng ating paglalakbay.*`;
     }
     return `## 🌿 ${title}
-**Atmosphere & Mood**: Pangilatan Ridge • Warm Memories
+**Mood**: Pangilatan Ridge • Warm Memories
 
-Hahahaha. Remember tong pag-adto nato diri sa ${location}? Nindot kaayo ang hangin ato unya hayag ang adlaw pero dili init sa panit kay bugnaw ang palibot.
+Hahahaha. Remember nung pumunta tayo rito sa ${location}? Napakasarap ng hangin noon tapos maliwanag ang araw pero hindi mainit sa balat kasi malamig ang paligid.
 
-Bisan naglakaw-lakaw ra ta sa trail, kanang mga simpleng estorya nato samtang nagtan-aw sa bukid, dira jud nako na-realize unsa ka nindot ning mga panahona. Na appreciate jud nako imong company ato.
+Kahit naglalakad-lakad lang tayo sa trail, yung mga simpleng kwentuhan natin habang pinagmamasdan ang bundok, doon ko talaga na-realize kung gaano kaganda ang mga ganitong panahon. Sobrang na-appreciate ko ang company mo.
 
-> 💡 *Clint's Reflection: Ang pinakanindot nga adventure dili kadtong pinakalayo, kundi kadtong lugar diin magkauban ta nga malinawon.*`;
+> 💡 *Clint's Reflection: Ang pinakamagandang adventure hindi yung pinakamalayo, kundi yung lugar kung saan tahimik at payapa kayong magkasama.*`;
   }
 
   if (location.toLowerCase().includes('gullas') || title.toLowerCase().includes('gullas')) {
     return `## 🌿 ${title}
-**Atmosphere & Mood**: Cool Mountain Ridge • Fresh Air
+**Mood**: Cool Mountain Ridge • Fresh Air
 
-Hahahaha. Ang Gullas Mountain ride jud nato pirmi ang pinaka-relaxing nga escape. Kadtong bugnaw nga hangin samtang nagtan-aw ta sa syudad gikan sa ibabaw, murag layo kaayo sa tanang kagul-anan.
+Hahahaha. Ang Gullas Mountain ride talaga natin ang isa sa pinaka-relaxing na escape. Yung malamig na simoy habang nakatingin tayo sa city lights mula sa itaas, parang napakalayo sa lahat ng ingay at alalahanin.
 
-Lami kaayo mag-relax diri samtang nagpaminaw sa acoustic songs ug nag-estorya sa atong mga plano sa unahan.
+Ang sarap mag-unwind dito habang nagpapatugtog ng acoustic songs at nag-uusap tungkol sa mga pangarap natin sa hinaharap.
 
-> 💡 *Clint's Reflection: Sa kinatas-ang dapit, mas klaro nimong makita kung unsa ang tinuod nga bililhon sa imong kasingkasing.*`;
+> 💡 *Clint's Reflection: Sa pinakamataas na lugar, mas malinaw mong makikita kung ano ang totoong mahalaga sa iyong puso.*`;
   }
 
   if (location.toLowerCase().includes('flood') || title.toLowerCase().includes('flood')) {
     return `## 🌿 ${title}
-**Atmosphere & Mood**: Wild Adventure • Wet & Wild Journey
+**Mood**: Wild Adventure • Wet & Wild Journey
 
-Hahaha! Grabe to nga baha ato nga adlaw! Bisan basa na kaayo atong mga sapatos ug nag-ulan ug kusog, sige ra gihapon tag katawa kay murag salida sa sine atong sitwasyon.
+Hahaha! Grabe yung baha noong araw na 'yon! Kahit basang-basa na ang sapatos natin at malakas ang ulan, tawa pa rin tayo nang tawa kasi parang eksena sa pelikula.
 
-Resilient kaayo ta ato. Maski unsa pay agian nga baha o unos, basta magtinabangay, malutsan ra jud tanan.
+Sobrang tibay natin noon. Kahit anong dumaan na baha o unos, basta nagtutulungan tayo, nalalampasan natin ang lahat.
 
-> 💡 *Clint's Reflection: Ang baha mulabay ra, apan ang kaisog ug katawa samtang nilabang ta sa tubig magpabilin sa kasingkasing.*`;
+> 💡 *Clint's Reflection: Lilipas din ang baha, ngunit ang tapang at tawanan habang lumulusong tayo ay mananatili magpakailanman.*`;
   }
 
   if (location.toLowerCase().includes('ride') || title.toLowerCase().includes('ride') || isVideo) {
     return `## 🌿 ${title}
-**Atmosphere & Mood**: Open Highway • Moving Forward
+**Mood**: Open Highway • Moving Forward
 
-Hahahaha. Lami jud kaayo ang feeling sa long ride no? Ang tunog sa tambutso, ang hangin, ug ang open highway sa atong atubangan.
+Hahahaha. Ang sarap talaga ng pakiramdam sa long ride diba? Yung tunog ng makina, yung simoy ng hangin, at yung malawak na kalsada sa ating harapan.
 
-Murag timailhan jud ni sa atong kinabuhi—padayon lang sa pagbiyahe, enjoyon ang matag kurbada sa dalan, ug dili kalimtan ang paglingi sa kaanindot sa palibot.
+Simbolo talaga 'to ng buhay natin—tuloy-tuloy lang sa pagbiyahe, i-enjoy ang bawat kurbada ng daan, at huwag kalimutang pahalagahan ang ganda ng paligid.
 
-> 💡 *Clint's Reflection: Dili sa katulin sa dagan masukod ang byahe, kundi sa kalinaw sa imong kasingkasing samtang nagtan-aw sa unahan.*`;
+> 💡 *Clint's Reflection: Hindi sa bilis ng takbo nasusukat ang biyahe, kundi sa kapayapaan ng puso habang nakatingin sa hinaharap.*`;
   }
 
-  // Summer, Twilight, November & Random Moments
-  if (title.toLowerCase().includes('twilight') || title.toLowerCase().includes('sunset') || title.toLowerCase().includes('dusk')) {
-    return `## 🌿 ${title}
-**Atmosphere & Mood**: Twilight Glow • Golden Horizon
-
-Hahahaha. Tan-awa ra ang kolor sa langit ato nga higayon—kanang orange nga nisagol sa purpura samtang nagkaduol ang gabii.
-
-Makapahinumdom jud nga bisan matapos ang adlaw, naay kaanindot nga mahabilin. Salamat sa pagtan-aw sa sunset kauban nako.
-
-> 💡 *Clint's Reflection: Ang pagsalop sa adlaw usa ka pahalipay sa usa ka adlaw nga gihatag kanato, ug saad sa bag-ong buntag ugma damlag.*`;
-  }
-
-  // Default universal warm Clint's voice
+  // Universal fallback in Clint's natural Taglish
   if (tone === 'Quiet Wonder') {
     return `## 🌿 ${title}
-**Atmosphere & Mood**: Quiet Wonder • Timeless Grace
+**Mood**: Quiet Wonder • Timeless Grace
 
 There is an unspoken beauty in this moment. The light falls softly across the frame, capturing a fleeting second in time that now lives forever in our memories.
 
@@ -227,35 +265,35 @@ Moments like these remind us to be still, to look around, and to cherish the qui
 
   if (tone === 'Playful & Random') {
     return `## 🌿 ${title}
-**Atmosphere & Mood**: Random Laughs • Candid Snapshot
+**Mood**: Random Laughs • Candid Snapshot
 
-Hahahaha! Unsa gani to atong gi-estoryahan diri? Nakalimot na ko sa detalye pero kahibalo ko nga nalingaw jud ta ato!
+Hahahaha! Ano nga ulit yung pinag-uusapan natin dito? Medyo nakalimutan ko na yung eksaktong detalye pero alam kong sobrang nag-enjoy tayo noon!
 
-Mao jud ni ang nindot sa candid photos—dili scripted, dili pilit, natural ra jud kaayo nga good vibes.
+Ito talaga ang maganda sa mga candid pictures—hindi scripted, hindi pilit, natural na natural lang ang good vibes.
 
-> 💡 *Clint's Reflection: Ang pinakacute nga memories mao kadtong mga ginagmayng katawa nga wala gi-plano.*`;
+> 💡 *Clint's Reflection: Ang pinaka-cute na memories ay yung mga simpleng tawanan na hindi pinlano.*`;
   }
 
   if (tone === 'Pasalamat & Gratitude') {
     return `## 🌿 ${title}
-**Atmosphere & Mood**: Heartfelt Gratitude • Deep Appreciation
+**Mood**: Heartfelt Gratitude • Deep Appreciation
 
-Salamat sa Ginoo sa matag higayon ug panumduman nga gitugot kanato. Ang matag hulagway nagrepresentar sa gasa sa kinabuhi, gugma, ug panag-uban.
+Salamat sa Panginoon sa bawat pagkakataon at alaala na ipinagkaloob sa atin. Ang bawat litrato ay patunay ng biyaya ng buhay, pagmamahalan, at pagsasama.
 
-Na appreciate jud nako ang matag lakaw, matag estorya, ug matag adlaw nga magkauban ta. Daghang salamat Maica.
+Sobrang na-appreciate ko ang bawat lakad, bawat kwentuhan, at bawat araw na magkasama tayo. Maraming salamat Maica.
 
-> 💡 *Clint's Reflection: Ang pasalamat naghimo sa kung unsa ang anaa kanato nga mahimong igo ug labaw pa sa igo.*`;
+> 💡 *Clint's Reflection: Ang pasasalamat ay nagpapakita na ang lahat ng meron tayo ay sapat at higit pa sa sapat.*`;
   }
 
   // Standard Clint's Heart Default
   return `## 🌿 ${title}
-**Atmosphere & Mood**: Warm Nostalgia • Clint's Voice
+**Mood**: Warm Nostalgia • Clint's Story
 
-Hahahaha. Remember tong sa ${location}? 
+Hahahaha. Remember noong nasa ${location} tayo? 
 
-Murag wala pa jud tay klarong plan ato no, naglakaw-lakaw ra ta. Pero funny kaayo kay looking back, kanang gagmay nga moments—kanang mga simpleng estorya ug katawa samtang nagtan-aw ta sa palibot—dira jud nako na-realize unsa ka special ang journey nato. Ka-peaceful jud kaayo sa feeling.
+Parang wala pa tayong masyadong plano noon diba, basta lakad lang tayo. Pero nakakatuwa kasi looking back, yung mga simpleng kwentuhan at tawanan habang pinagmamasdan ang paligid—doon ko talaga na-realize kung gaano ka-special ang journey natin. Napaka-peaceful sa pakiramdam.
 
-Na appreciate jud nako ni ug maayo. Thank you sa pag-uban pirmi.
+Sobrang na-appreciate ko 'to. Thank you for always being by my side.
 
-> 💡 *Clint's Reflection: Dili man sa destination masukod ang lakaw... naa jud sa tawo nga imong kauban nagtan-aw sa dalan.*`;
+> 💡 *Clint's Reflection: Hindi nasusukat sa layo ng destinasyon ang biyahe... kundi sa taong katabi mo habang pinagmamasdan ang daan.*`;
 }
