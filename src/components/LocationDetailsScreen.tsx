@@ -81,12 +81,12 @@ export default function LocationDetailsScreen({
     };
   }, []);
 
-  // Actively Generate Story using Gemini AI with Clint's authentic personality
-  const handleGenerateStory = async (tone = selectedTone, forceRegenerate = false) => {
+  // Actively Load and Generate Story in Clint's authentic Taglish voice
+  const handleGenerateStory = (tone = selectedTone, forceRegenerate = false) => {
     stopSpeech();
     const cacheKey = `${memory.id}_${tone}`;
 
-    // If cached and not forcing fresh generation, load immediately
+    // If cached and not forcing, load immediately
     if (!forceRegenerate && storyCacheRef.current[cacheKey]) {
       setAiStory(storyCacheRef.current[cacheKey]);
       memory.aiStory = storyCacheRef.current[cacheKey];
@@ -95,39 +95,14 @@ export default function LocationDetailsScreen({
 
     setIsStoryLoading(true);
 
-    try {
-      const res = await fetch('/api/memory-story', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: memory.title,
-          location: memory.location,
-          description: memory.description,
-          style: tone,
-          driveFileId: memory.driveFileId,
-          imageUrl: memory.imageUrl,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.story) {
-          storyCacheRef.current[cacheKey] = data.story;
-          setAiStory(data.story);
-          memory.aiStory = data.story;
-          setIsStoryLoading(false);
-          return;
-        }
-      }
-      throw new Error('API did not return a valid story');
-    } catch {
-      // Graceful fallback to rich default narrative in case of network interruption
-      const fallback = getHardcodedStory(memory, tone);
-      setAiStory(fallback);
-      memory.aiStory = fallback;
-    } finally {
+    // Instant local story retrieval from rich bespoke catalog
+    setTimeout(() => {
+      const story = getHardcodedStory(memory, tone);
+      storyCacheRef.current[cacheKey] = story;
+      setAiStory(story);
+      memory.aiStory = story;
       setIsStoryLoading(false);
-    }
+    }, 200);
   };
 
   // Sync and generate story on memory change or tone change
@@ -520,7 +495,7 @@ export default function LocationDetailsScreen({
                           <Feather className="w-3 h-3 text-emerald-500 absolute -top-1 -right-1 animate-bounce" />
                         </div>
                         <p className="text-xs font-semibold text-gray-700">
-                          Sinusulat ang kwento...
+                          Binubuksan ang kwento...
                         </p>
                         <p className="text-[11px] text-gray-400">
                           Binabalikan ang mga alaala sa {selectedTone.toLowerCase()}

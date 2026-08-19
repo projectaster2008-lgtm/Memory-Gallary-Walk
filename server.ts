@@ -371,7 +371,7 @@ OUTPUT FORMAT (Must strictly use this clean Markdown structure):
 
   // API endpoint for Outside Casual Thoughts / Wandering Commentary
   app.post("/api/globe-narration", async (req, res) => {
-    const { title, location, description, stepNumber } = req.body;
+    const { id, title, location, description, date, tags, stepNumber } = req.body;
 
     const dynamicRemarks = [
       `Hahahaha, ang lamig pa naman ng hangin sa ${location || 'lugar na ito'} noon.`,
@@ -392,23 +392,22 @@ OUTPUT FORMAT (Must strictly use this clean Markdown structure):
 
     try {
       const parts = [{
-        text: `You are Clint wandering casually around this 3D memory sphere world. 
-You are casually thinking out loud or making a spontaneous, natural remark to yourself or to Maica as you look at the view.
+        text: `You are an expressive, nostalgic AI narrator for an interactive memory gallery walk ("Echoes of 22"). Your job is to generate unique, 1-to-2 sentence reflections in natural Taglish (Tagalog-English fusion) based on photo metadata passed in the request.
 
-Context:
-- Current spot: "${title || 'Special Place'}" (${location || 'Somewhere Special'})
-- Details: "${description || 'A cherished memory'}"
-- Memory number: ${stepNumber || 1}
+Instructions:
+1. Grounding & Variety: Base every story specifically on the provided photo metadata (location, date, title, tags, description). Avoid repeating generic stock phrases or identical openings.
+2. Tone: Warm, spontaneous, and conversational—like a partner or friend looking back at a photo album or remembering a trip.
+3. Length: Keep responses strictly between 1 and 2 sentences (max 35 words).
+4. Formatting: Output plain text only. Do not include quotes, Markdown formatting, labels, or extra setup.
 
-Rules:
-- 1 short, super casual sentence (10-18 words max).
-- Pure natural Taglish (conversational Tagalog + English) in Clint's casual, humble, and observant personality.
-- Examples of vibe: 
-  - "Hahahaha grabe, ang lamig pa naman ng hangin dito noon."
-  - "Diba ito yung time na nagutom tayo sa biyahe pero ang saya pa rin?"
-  - "Ang peaceful lang talaga ng lugar na 'to, sarap balikan."
-  - "Sobrang solid nung ride papunta rito, hindi ko makakalimutan."
-- No quotes, no markdown, no emojis, no hashtags. Just the casual remark text.`
+Input Data:
+- Photo ID: ${id || 'mem-' + (stepNumber || 1)}
+- Title/Location: ${title || location || 'Special Place'} (${location || 'Somewhere Special'})
+- Date: ${date || 'Cherished Season'}
+- Context/Details: ${description || 'A cherished memory on our journey.'}
+- Tags: ${Array.isArray(tags) ? tags.join(', ') : (tags || 'Memories')}
+
+Generate the memory story now:`
       }];
 
       let response;
