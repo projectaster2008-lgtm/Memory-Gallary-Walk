@@ -17,6 +17,7 @@ import {
   DoorOpen,
   ExternalLink,
   X,
+  ArrowLeft,
 } from 'lucide-react';
 import { GLOBE_RADIUS } from '../data';
 import { MemoryItem, ViewMode } from '../types';
@@ -57,6 +58,7 @@ interface GalleryGlobeProps {
   folderName: string;
   onSelect: (memory: MemoryItem) => void;
   onResetView?: () => void;
+  onBackToLobby?: () => void;
 }
 
 export default function GalleryGlobe({
@@ -64,6 +66,7 @@ export default function GalleryGlobe({
   folderName,
   onSelect,
   onResetView,
+  onBackToLobby,
 }: GalleryGlobeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -515,26 +518,42 @@ export default function GalleryGlobe({
 
       {/* Top Floating Navigation & Music Control Header */}
       <div className="absolute top-4 left-4 right-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 pointer-events-none z-30">
-        {/* Left: App Title & Active Count */}
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="flex items-center gap-3 bg-neutral-950/85 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/10 shadow-lg pointer-events-auto interactive-control text-white"
-        >
-          <div
-            className="w-2.5 h-2.5 rounded-full animate-pulse shadow-sm"
-            style={{ backgroundColor: currentTrack.palette.primary }}
-          />
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-white tracking-tight flex items-center gap-1.5 font-display">
-              Memory Gallery Walk
-            </span>
-            <span className="text-[10px] text-gray-300 truncate max-w-[180px] sm:max-w-[260px]">
-              {folderName} ({activeMemoryList.length} destinations)
-            </span>
-          </div>
-        </motion.div>
+        {/* Left: App Title & Active Count + Back to Lobby */}
+        <div className="flex items-center gap-2 pointer-events-auto">
+          {onBackToLobby && (
+            <motion.button
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              onClick={onBackToLobby}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-neutral-950/85 hover:bg-neutral-900 border border-white/15 text-white text-xs font-medium backdrop-blur-md shadow-lg transition-all hover:scale-105 active:scale-95 text-amber-300"
+              title="Return to Sanctuary Lobby"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Lobby</span>
+            </motion.button>
+          )}
+
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="flex items-center gap-3 bg-neutral-950/85 backdrop-blur-md px-4 py-2.5 rounded-full border border-white/10 shadow-lg pointer-events-auto interactive-control text-white"
+          >
+            <div
+              className="w-2.5 h-2.5 rounded-full animate-pulse shadow-sm"
+              style={{ backgroundColor: currentTrack.palette.primary }}
+            />
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-white tracking-tight flex items-center gap-1.5 font-display">
+                Memory Gallery Walk
+              </span>
+              <span className="text-[10px] text-gray-300 truncate max-w-[180px] sm:max-w-[260px]">
+                {folderName} ({activeMemoryList.length} destinations)
+              </span>
+            </div>
+          </motion.div>
+        </div>
 
         {/* Center: Search & Quick Tag Filter */}
         <motion.div 
